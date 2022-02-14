@@ -14,14 +14,16 @@ def read_count_threshold(output_dir:str,
 
 def estimating_biomass(
     total_reads: qiime2.NumericMetadataColumn,
-    min_total_reads: Int,
+    min_total_reads: int,
     positive_control_value: str,
     positive_control_column: qiime2.CategoricalMetadataColumn,
+    pcr_template_vol = int,
+    dna_extract_vol = int
     ) -> pd.DataFrame:
 
     total_reads = total_reads.to_dataframe()
     filtered = total_reads[
-        (total_reads.total_reads > 1150) &
+        (total_reads.total_reads > min_total_reads) &
         (total_reads.total_reads.notnull())].copy()
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
 
@@ -40,12 +42,6 @@ def estimating_biomass(
     filtered['estimated_biomass_per_pcrrxn'] = \
         10**filtered.log_total_reads*lm.coef_[0]+lm.intercept_
 
-    # go back to original file and calculate the log cells per extraction save
-    # as new column <estimated_biomass_per_pcrrxn> enter the PCR reaction
-    # volume
-    pcr_template_vol = 5
-    # enter the DNA extraction volume
-    dna_extract_vol = 60
     # normalize this volume up to the DNA extraction volume (DNA extraction
     # volume / PCR volume) (cells per 60 ul) save into new column called
     # <estimated_biomass_per_dnarxn>
