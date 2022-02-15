@@ -7,6 +7,23 @@ import os
 import q2templates
 import pkg_resources
 
+# define the allosteric sigmoid equation
+def allosteric_sigmoid(x, h, k_prime):
+    y = x ** h / (k_prime + x ** h)
+    return y
+
+def _threshold(r1,r2):
+        # 50% threshold (recommended)
+        # assign variables and solve for X (number of reads to pass filter)
+        popt, pcov = curve_fit(allosteric_sigmoid, r1, r2, method='dogbox')
+        h = popt[0]  # first value printed above graph
+        k = popt[1]   # second value printed above graph
+        y = 0.5 ## what you want to solve for
+
+        min_log_reads = np.power((k/(1/y-1)),(1/h))
+        min_freq_50 = np.power(10, min_log_reads).astype(int)
+        return min_freq_50
+
 def read_count_threshold(output_dir:str,
                         positive_control_value: str,
                         positive_control_column: qiime2.CategoricalMetadataColumn,
@@ -61,22 +78,15 @@ def read_count_threshold(output_dir:str,
 
     # PLOTTING
     katharo = df[['correct_assign','control_reads','asv_reads']]
-    katharo['log_asv_reads'] = np.log10(katharo['asv_reads'])
-
-    # define the allosteric sigmoid equation
-    def allosteric_sigmoid(x, h, k_prime):
-        y = x ** h / (k_prime + x ** h)
-        return y
+    katharo['log_asv_reads'] = np.log10(katharo['asv_reads'].values)
 
     # fit the curve to your data
     popt, pcov = curve_fit(allosteric_sigmoid, katharo['log_asv_reads'], katharo['correct_assign'], method='dogbox')
-    # print(popt)
-    # plot fit curve
-    x = np.linspace(0, 5, 50)
-    y = allosteric_sigmoid(x, *popt)
 
     # plot the fit
     # When plotting 
+    x = np.linspace(0, 5, 50)
+    y = allosteric_sigmoid(x, *popt)
     plt.plot(katharo['log_asv_reads'], katharo['correct_assign'], 'o', label='data')
     plt.plot(x,y, label='fit')
     plt.ylim(0, 1.05)
@@ -84,14 +94,7 @@ def read_count_threshold(output_dir:str,
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
-    # 50% threshold (recommended)
-    # assign variables and solve for X (number of reads to pass filter)
-    h = popt[0]  # first value printed above graph
-    k = popt[1]   # second value printed above graph
-    y = 0.5 ## what you want to solve for
-
-    min_log_reads = np.power((k/(1/y-1)),(1/h))
-    min_freq_50 = np.power(10, min_log_reads).astype(int)
+    min_freq_50 = _threshold(katharo['log_asv_reads'], katharo['correct_assign'])
 
     # TODO: Put into visualizer
 
