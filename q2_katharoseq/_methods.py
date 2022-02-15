@@ -91,30 +91,14 @@ def read_count_threshold(output_dir:str,
 
     min_log_reads = np.power((k/(1/y-1)),(1/h))
     min_freq_50 = np.power(10, min_log_reads).astype(int)
-    min_freq_50
 
     # TODO: Put into visualizer
 
-    result = pd.DataFrame([min_freq_50],
-        index = ['50_percent_threshold'])
+    result = pd.DataFrame({'_':min_freq_50}, 
+        index=['50 percent threshold'])
     table_html = q2templates.df_to_html(result.to_frame())
 
-    # context = {
-    #     'table': table_html,
-    #     'sample_size': sample_size,
-    #     'mismatched_ids': mismatched_ids
-    # }
-
-    context = {
-        'table': table_html,
-    }
-
-    # TEMPLATES = pkg_resources.resource_filename('q2_diversity', '_beta')
-
-    # index = os.path.join(
-    #     TEMPLATES, 'mantel_assets', 'index.html')
-
-    index = output_dir + '/index.html'
+    index = 'index.html'
 
     q2templates.render(index, output_dir, context=context)
 
@@ -138,17 +122,10 @@ def read_count_threshold(output_dir:str,
     plt.savefig(os.path.join(output_dir, 'mantel-scatter.svg'))
     plt.close()
 
-    context = {
-        'table': table_html,
-        'sample_size': sample_size,
-        'mismatched_ids': mismatched_ids
-    }
+    context = {'table': table_html}
 
-    TEMPLATES = pkg_resources.resource_filename('q2_diversity', '_beta')
-
-    index = os.path.join(
-        TEMPLATES, 'mantel_assets', 'index.html')
-    q2templates.render(index, output_dir, context=context)
+    index = 'index.html'
+    q2templates.render(index, output_dir)
 
 
 
