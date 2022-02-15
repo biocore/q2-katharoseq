@@ -51,6 +51,6 @@ plugin.visualizers.register_function(
         ),
     },
     name='katharoseq',
-    description='',
-    citations=[]
+    description='Katharoseq protocol for analyzing low biomass samples.',
+    citations=[citations['minich2018']]
 )
