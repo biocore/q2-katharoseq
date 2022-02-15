@@ -1,12 +1,13 @@
 import importlib
 from qiime2.plugin import (Plugin, Citations, Str,
-                           MetadataColumn, Categorical, Choices)
+                           MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
-from q2_types.feature_data import FeatureData, Taxonomy
-from ._methods import read_count_threshold
-import q2_katharoseq
+from q2_types.feature_data import FeatureData
+from . import read_count_threshold
+
 
 citations = Citations.load('citations.bib', package='q2_katharoseq')
+
 
 plugin = Plugin(
     name='katharoseq',
@@ -18,25 +19,22 @@ plugin = Plugin(
     short_description='Plugin for KatharoSeq.',
 )
 
+
 plugin.visualizers.register_function(
     function=read_count_threshold,
     inputs={
-        'table': FeatureTable[Frequency],
-        'taxonomy': FeatureData[Taxonomy]
+        'table': FeatureTable[Frequency]
     },
     parameters={
         'control': Str % Choices(['zymobiomics', 'classic', 'atcc']),
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],
-
+        'cell_count_column': MetadataColumn[Numeric]
     },
     input_descriptions={
         'table': (
             'A FeatureTable collapsed to the genus level (level 6) that '
             'contains the control samples.'
-        ),
-        'taxonomy': (
-            ''
         ),
     },
     parameter_descriptions={
