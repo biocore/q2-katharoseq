@@ -1,9 +1,9 @@
 import importlib
 from qiime2.plugin import (Plugin, Citations, Str,
-                           MetadataColumn, Categorical, Choices)
+                           MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
-from q2_types.feature_data import FeatureData, Taxonomy
-from ._methods import read_count_threshold
+from q2_types.feature_data import FeatureData
+from . import read_count_threshold
 
 citations = Citations.load('citations.bib', package='q2_katharoseq')
 
@@ -20,32 +20,34 @@ plugin = Plugin(
 plugin.visualizers.register_function(
     function=read_count_threshold, # NAME OF THE FUNCTION FOR USERS
     inputs={
-        'table': FeatureTable[Frequency],
-        'taxonomy': FeatureData[Taxonomy]
+        'table': FeatureTable[Frequency]\
     },
     parameters={
         'control': Str % Choices(['zymobiomics', 'classic', 'atcc']),
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],
-
+        'cell_count_column': MetadataColumn[Numeric]
     },
     input_descriptions={
         'table': (
             ''
-        ),
-        'taxonomy': (
-            ''
-        ),
+        )
     },
     parameter_descriptions={
         'control': (
-            ''
+            'Environment used to calculate reads aligning to mock '
+            'community. Available options are '
+            '(atcc, zymobiomics, classic).'
         ),
         'positive_control_value': (
-            ''
+            'Value that indicates a positive control.'
         ),
         'positive_control_column': (
-            ''
+            'Column that contains positive controls.'
+        ),
+        'cell_count_column': (
+            'Column that contains cell count information. '
+            'Used to normalize '
         ),
     },
     name='katharoseq',
