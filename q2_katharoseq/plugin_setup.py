@@ -4,21 +4,22 @@ from qiime2.plugin import (Plugin, Citations, Str,
 from q2_types.feature_table import (FeatureTable, Frequency)
 from q2_types.feature_data import FeatureData, Taxonomy
 from ._methods import read_count_threshold
+import q2_katharoseq
 
 citations = Citations.load('citations.bib', package='q2_katharoseq')
 
 plugin = Plugin(
     name='katharoseq',
-    version='0.0.1',
-    website='https://github.com/dpear/q2-katharoseq',
+    version=q2_katharoseq.__version__,
+    website='https://github.com/biocore/q2-katharoseq',
     package='q2_katharoseq',
-    description=('This QIIME 2 plugin implements the katharoseq '
+    description=('This QIIME 2 plugin implements the KatharoSeq '
                  'protocol for analyzing low biomass samles.'),
-    short_description='Plugin for katharoseq.',
+    short_description='Plugin for KatharoSeq.',
 )
 
 plugin.visualizers.register_function(
-    function=read_count_threshold, # NAME OF THE FUNCTION FOR USERS
+    function=read_count_threshold,
     inputs={
         'table': FeatureTable[Frequency],
         'taxonomy': FeatureData[Taxonomy]
@@ -31,7 +32,8 @@ plugin.visualizers.register_function(
     },
     input_descriptions={
         'table': (
-            ''
+            'A FeatureTable collapsed to the genus level (level 6) that '
+            'contains the control samples.'
         ),
         'taxonomy': (
             ''
@@ -39,16 +41,20 @@ plugin.visualizers.register_function(
     },
     parameter_descriptions={
         'control': (
-            ''
+            'The type of positive control used.'
         ),
         'positive_control_value': (
-            ''
+            'The value in the control column that demarks which samples are '
+            'the positive controls.'
         ),
         'positive_control_column': (
-            ''
+            'The column in the sample metadata that describes which samples '
+            'are and are not controls.'
         ),
     },
-    name='katharoseq',
-    description='',
-    citations=[]
+    name='Methods for the application of the KatharoSeq protocol',
+    description='KatharoSeq is high-throughput protocol combining laboratory '
+                'and bioinformatic methods that can differentiate a true '
+                'positive signal in samples with as few as 50 to 500 cells.',
+    citations=[citations['minich2018']]
 )
