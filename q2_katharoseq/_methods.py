@@ -1,10 +1,6 @@
 import pandas as pd
 import qiime2
-import pkg_resources
-
-# from qiime2.plugins import taxa
-# Cancelling this no longer using collapse
-# Require the table to be collapsed
+import numpy as np
 
 def read_count_threshold(output_dir:str,
                         positive_control_value: str,
