@@ -1,6 +1,11 @@
 import pandas as pd
 import qiime2
 import numpy as np
+from scipy.optimize import curve_fit
+import matplotlib.pyplot as plt
+import os
+import q2templates
+import pkg_resources
 
 def read_count_threshold(output_dir:str,
                         positive_control_value: str,
@@ -13,12 +18,12 @@ def read_count_threshold(output_dir:str,
     cell_count_column       = cell_count_column.to_series()
 
     positive_controls = positive_control_column[positive_control_column==positive_control_value]
-    cell_counts       = cell_counts.loc[positive_controls.index]
+    cell_counts       = cell_count_column.loc[positive_controls.index]
 
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in positive control column.')
 
-    table_positive = table.loc[set(postive_controls.index)]
+    table_positive = table.loc[set(positive_controls.index)]
 
     if not table_positive.shape[0]:
         raise ValueError('No positive control samples found in table.')
@@ -29,7 +34,7 @@ def read_count_threshold(output_dir:str,
     max_cell_counts = cell_counts.idxmax()
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
-    max_inputT = max_inputT.sort_values(max_inputT.columns[0], ascending = False).head(10)
+    max_inputT = max_inputT.sort_values(ascending = False).head(10)
 
     control_type = {'atcc':['d__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;f__Clostridiaceae;g__Clostridium',
                            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;__',
@@ -43,8 +48,8 @@ def read_count_threshold(output_dir:str,
                            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Lactobacillaceae;g__Lactobacillus',
                            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;f__Enterococcaceae;g__Enterococcus',
                            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Staphylococcales;f__Staphylococcaceae;g__Staphylococcus'],
-                    'classic':['k__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;f__Bacillaceae;g__Bacillus',
-                            'k__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus']
+                    'classic':['d__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;f__Bacillaceae;g__Bacillus',
+                            'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus']
                     }
 
     # Calculate the total number of reads per sample
@@ -71,10 +76,11 @@ def read_count_threshold(output_dir:str,
     y = allosteric_sigmoid(x, *popt)
 
     # plot the fit
-    pylab.plot(katharo['log_asv_reads'], katharo['correct_assign'], 'o', label='data')
-    pylab.plot(x,y, label='fit')
-    pylab.ylim(0, 1.05)
-    pylab.legend(loc='best')
+    # When plotting 
+    plt.plot(katharo['log_asv_reads'], katharo['correct_assign'], 'o', label='data')
+    plt.plot(x,y, label='fit')
+    plt.ylim(0, 1.05)
+    plt.legend(loc='best')
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
@@ -89,12 +95,14 @@ def read_count_threshold(output_dir:str,
 
     # TODO: Put into visualizer
 
-    result = pd.DataFrame({'_':min_freq_50}, 
-        index=['50 percent threshold'])
+    max_input_html = q2templates.df_to_html(max_inputT.to_frame())
+    context = {'minimum_frequency': min_freq_50,
+               'table': max_input_html
+            }
 
-    table_html = q2templates.df_to_html(result.to_frame())
-    context = {'table': table_html}
-    index = 'index.html'
+
+    TEMPLATES = pkg_resources.resource_filename('q2_katharoseq', 'read_count_threshold_assets')
+    index = os.path.join(TEMPLATES, 'index.html')
     q2templates.render(index, output_dir, context=context)
 
 
