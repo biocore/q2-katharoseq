@@ -30,7 +30,7 @@ plugin.visualizers.register_function(
     },
     input_descriptions={
         'table': (
-            ''
+            'Feature table of frequencies.'
         )
     },
     parameter_descriptions={
