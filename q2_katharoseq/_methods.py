@@ -83,7 +83,6 @@ def read_count_threshold(output_dir:str,
     plt.close()
 
     # 50% threshold (recommended)
-
     # assign variables and solve for X (number of reads to pass filter)
     h = popt[0]  # first value printed above graph
     k = popt[1]   # second value printed above graph
@@ -96,36 +95,11 @@ def read_count_threshold(output_dir:str,
 
     result = pd.DataFrame({'_':min_freq_50}, 
         index=['50 percent threshold'])
-    table_html = q2templates.df_to_html(result.to_frame())
-
-    index = 'index.html'
-
-    q2templates.render(index, output_dir, context=context)
-
-
-
 
     table_html = q2templates.df_to_html(result.to_frame())
-
-    # We know the distance matrices have matching ID sets at this point, so we
-    # can safely generate all pairs of IDs using one of the matrices' ID sets
-    # (it doesn't matter which one).
-    scatter_data = []
-    for id1, id2 in itertools.combinations(dm1.ids, 2):
-        scatter_data.append((dm1[id1, id2], dm2[id1, id2]))
-
-    plt.figure()
-    x = 'Pairwise Distance (%s)' % label1
-    y = 'Pairwise Distance (%s)' % label2
-    scatter_data = pd.DataFrame(scatter_data, columns=[x, y])
-    sns.regplot(x=x, y=y, data=scatter_data, fit_reg=False)
-    plt.savefig(os.path.join(output_dir, 'mantel-scatter.svg'))
-    plt.close()
-
     context = {'table': table_html}
-
     index = 'index.html'
-    q2templates.render(index, output_dir)
+    q2templates.render(index, output_dir, context=context)
 
 
 
