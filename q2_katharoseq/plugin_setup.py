@@ -1,5 +1,5 @@
 import importlib
-from qiime2.plugin import (Plugin, Citations, Str,
+from qiime2.plugin import (Plugin, Citations, Str, Int,
                            MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
 from q2_types.feature_data import FeatureData
@@ -20,10 +20,11 @@ plugin = Plugin(
 plugin.visualizers.register_function(
     function=read_count_threshold, # NAME OF THE FUNCTION FOR USERS
     inputs={
-        'table': FeatureTable[Frequency]\
+        'table': FeatureTable[Frequency]
     },
     parameters={
         'control': Str % Choices(['zymobiomics', 'classic', 'atcc']),
+        'threshold': Int,
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],
         'cell_count_column': MetadataColumn[Numeric]
@@ -38,6 +39,10 @@ plugin.visualizers.register_function(
             'Environment used to calculate reads aligning to mock '
             'community. Available options are '
             '(atcc, zymobiomics, classic).'
+        ),
+        'threshold': (
+            'Threshold to use in calculating minimum frequency. '
+            'Must be int in [0,100].'
         ),
         'positive_control_value': (
             'Value that indicates a positive control.'

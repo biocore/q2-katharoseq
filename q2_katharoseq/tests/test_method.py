@@ -3,8 +3,6 @@ from q2_katharoseq import read_count_threshold
 
 class KatharoSeqTestCase(TestCase):
 
-    # def setUp(self):
-
     def test_katharo(self):
 
         output_dir = '.'
@@ -20,14 +18,15 @@ class KatharoSeqTestCase(TestCase):
             index=['s1','s2','s3','s4'], columns=['f1','f2','f3','f4'])
 
         control = 'classic'
-
+        threshold = 50
+        
         read_count_threshold(output_dir,
+                        threshold,
                         positive_control_value,
                         positive_control_column,
                         cell_count_column,
                         table,
                         control)
-
 
 
 if __name__=='__main__':
