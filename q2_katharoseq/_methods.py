@@ -12,8 +12,9 @@ def allosteric_sigmoid(x, h, k_prime):
     y = x ** h / (k_prime + x ** h)
     return y
 
+
 def _threshold(r1,r2,thresh):
-        # 50% threshold (recommended)
+
         # assign variables and solve for X (number of reads to pass filter)
         popt, pcov = curve_fit(allosteric_sigmoid, r1, r2, method='dogbox')
         h = popt[0]  # first value printed above graph
@@ -100,15 +101,12 @@ def read_count_threshold(output_dir:str,
 
     min_freq = _threshold(katharo['log_asv_reads'], katharo['correct_assign'], threshold/100)
 
-    # TODO: Put into visualizer
-
+    # Visualizer
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
     context = {'minimum_frequency': min_freq,
                'threshold': threshold,
                'table': max_input_html
             }
-
-
     TEMPLATES = pkg_resources.resource_filename('q2_katharoseq', 'read_count_threshold_assets')
     index = os.path.join(TEMPLATES, 'index.html')
     q2templates.render(index, output_dir, context=context)
