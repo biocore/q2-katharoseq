@@ -41,15 +41,18 @@ def read_count_threshold(
     # FILTER COLUMNS
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
-    cell_counts = cell_count_column.loc[positive_controls.index]
 
-    # CHECK SHAPES
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in ' +
                          'positive control column.')
-    table_positive = table.loc[set(positive_controls.index)]
-    if not table_positive.shape[0]:
-        raise ValueError('No positive controls found in table.')
+    cell_counts = cell_count_column.loc[positive_controls.index]
+
+    # CHECK SHAPES
+    try:
+        table_positive = table.loc[set(positive_controls.index)]
+    except KeyError:
+        raise KeyError('No positive controls found in table.')
+
     if threshold > 100 or threshold < 0:
         raise ValueError('Threshold must be between 0 and 100.')
     df = table_positive
