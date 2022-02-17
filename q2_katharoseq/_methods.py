@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import os
 import q2templates
 import pkg_resources
+import math
+from sklearn.linear_model import LinearRegression
 
 
 # Define the allosteric sigmoid equation
@@ -141,3 +143,50 @@ def read_count_threshold(
         'q2_katharoseq', 'read_count_threshold_assets')
     index = os.path.join(TEMPLATES, 'index.html')
     q2templates.render(index, output_dir, context=context)
+
+
+def estimating_biomass(
+        total_reads: qiime2.NumericMetadataColumn,
+        control_cell_extraction: qiime2.NumericMetadataColumn,
+        min_total_reads: int,
+        positive_control_value: str,
+        positive_control_column: qiime2.CategoricalMetadataColumn,
+        pcr_template_vol: int,
+        dna_extract_vol: int,
+        extraction_mass_g: qiime2.CategoricalMetadataColumn) -> pd.DataFrame:
+
+    total_reads = total_reads.to_series()
+    filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
+
+    positive_control_column = positive_control_column.to_series().loc[
+        filtered.index]
+    positive_controls = positive_control_column[
+        positive_control_column == positive_control_value]
+    positive_controls = filtered.loc[positive_controls.index]
+
+    positive_controls['control_cell_extraction'] = control_cell_extraction.to_series().loc[
+        positive_controls.index]
+    positive_controls['log_control_cell_extraction'] = \
+        positive_controls.control_cell_extraction.apply(math.log10)
+
+    lm = LinearRegression()
+    lm.fit(
+        positive_controls.log_total_reads.values.reshape(-1, 1),
+        positive_controls.log_control_cell_extraction)
+
+    filtered['estimated_biomass_per_pcrrxn'] = \
+        10**filtered.log_total_reads*lm.coef_[0]+lm.intercept_
+    filtered['estimated_biomass_per_dnarxn'] = \
+        filtered.estimated_biomass_per_pcrrxn*(
+            dna_extract_vol/pcr_template_vol)
+
+
+    filtered['extraction_mass_g'] = extraction_mass_g.to_series().loc[
+        filtered.index]
+    filtered['estimated_cells_per_g'] = \
+        filtered['estimated_biomass_per_dnarxn']/filtered['extraction_mass_g']
+    filtered['log_estimated_cells_per_g'] = \
+        filtered.estimated_cells_per_g.apply(math.log10)
+
+    return filtered
