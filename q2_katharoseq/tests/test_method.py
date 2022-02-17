@@ -3,14 +3,13 @@ from unittest import TestCase, main
 import tempfile
 import os
 import pandas as pd
+import qiime2
 from qiime2 import CategoricalMetadataColumn
 from qiime2 import NumericMetadataColumn
 
-
 from q2_katharoseq import read_count_threshold
-from q2_katharoseq import get_threshold
 from q2_katharoseq import allosteric_sigmoid
-
+from q2_katharoseq import get_threshold
 
 class KatharoSeqTestCase(TestCase):
 
@@ -22,26 +21,35 @@ class KatharoSeqTestCase(TestCase):
                        name='sampleid')
         positive_control_column = pd.Series(
             ['a', 'b', 'a', 'b'],
-            index=ind)
-        self.positive_control_column = qiime2.CategoricalMetadataColumn(
-            positive_control_column)
+            index=ind,
+            name='positive_control_column')
+        self.positive_control_column = CategoricalMetadataColumn(positive_control_column)
 
-        cell_count_column = pd.Series([1, 2, 3, 4])
-        self.cell_count_column = qiime2.NumericMetadataColumn(
-            cell_count_column)
+        cell_count_column = pd.Series(
+            [1, 2, 3, 4],
+            index=ind,
+            name='cell_count_column')
+        self.cell_count_column = NumericMetadataColumn(cell_count_column)
 
+        columns = [
+            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;'
+            'f__Bacillaceae;g__Bacillus',
+            'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;'
+            'o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus',
+            'f3',
+            'f4']
         self.table = pd.DataFrame(
             [[0, 1, 2, 3],
              [0, 1, 2, 3],
              [5, 4, 3, 2],
              [7, 2, 3, 4]],
             index=ind,
-            columns=['f1', 'f2', 'f3', 'f4'])
+            columns=columns)
 
         self.control = 'classic'
         self.threshold = 50
 
-    def test_katharo(self):
+    def test_outputs_index(self):
 
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
@@ -90,9 +98,13 @@ class KatharoSeqTestCase(TestCase):
 
     def test_no_positive_controls_in_col(self):
 
+        ind = pd.Index(['s1', 's2', 's3', 's4'],
+                       name='sampleid')
         positive_control_column = pd.Series(
                     ['not_a', 'b', 'not_a', 'b'],  # change 'a'
-                    index=['s1', 's2', 's3', 's4'])
+                    index=ind,
+                    name='positive_control_column')
+        positive_control_column = CategoricalMetadataColumn(positive_control_column)
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
@@ -124,7 +136,7 @@ class KatharoSeqTestCase(TestCase):
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
-                ValueError,
+                KeyError,
                 'No positive controls found '
                 'in table.'):
 
