@@ -48,7 +48,7 @@ class KatharoSeqTestCase(TestCase):
             total_reads=q2.NumericMetadataColumn(data['total_reads']),
             control_cell_extraction=q2.NumericMetadataColumn(
                 data['control_cell_into_extraction']),
-            min_total_reads=1500,
+            min_total_reads=1150,
             positive_control_value='True',
             positive_control_column=q2.CategoricalMetadataColumn(
                 data['positive_control']),
