@@ -16,7 +16,7 @@ def allosteric_sigmoid(x, h, k_prime):
     return y
 
 
-def _threshold(r1, r2, thresh):
+def get_threshold(r1, r2, thresh):
     # assign variables and solve for X (number of reads to pass filter)
     popt, pcov = curve_fit(allosteric_sigmoid, r1, r2, method='dogbox')
     h = popt[0]  # first value printed above graph
@@ -43,15 +43,18 @@ def read_count_threshold(
     # FILTER COLUMNS
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
-    cell_counts = cell_count_column.loc[positive_controls.index]
 
-    # CHECK SHAPES
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in ' +
                          'positive control column.')
-    table_positive = table.loc[set(positive_controls.index)]
-    if not table_positive.shape[0]:
-        raise ValueError('No positive control samples found in table.')
+    cell_counts = cell_count_column.loc[positive_controls.index]
+
+    # CHECK SHAPES
+    try:
+        table_positive = table.loc[set(positive_controls.index)]
+    except KeyError:
+        raise KeyError('No positive controls found in table.')
+
     if threshold > 100 or threshold < 0:
         raise ValueError('Threshold must be between 0 and 100.')
     df = table_positive
@@ -130,7 +133,7 @@ def read_count_threshold(
     plt.close()
 
     # FIND THRESHOLD
-    min_freq = _threshold(katharo['log_asv_reads'],
+    min_freq = get_threshold(katharo['log_asv_reads'],
                           katharo['correct_assign'],
                           threshold/100)
 
