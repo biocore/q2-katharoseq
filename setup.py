@@ -10,10 +10,13 @@
 
 from setuptools import setup, find_packages
 
+import versioneer
+
 setup(
     name="q2-katharoseq",
     packages=find_packages(),
-    version='0.0.1',
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
     author="Daniela Perry",
     author_email="dsperry@ucsd.edu",
     description="katharo seq protocol for low biomass samles",
@@ -26,6 +29,7 @@ setup(
     },
     zip_safe=False,
     install_requires=['scipy',
+                      'scikit-learn',
                       'matplotlib',
                       'seaborn',
                       'pandas']

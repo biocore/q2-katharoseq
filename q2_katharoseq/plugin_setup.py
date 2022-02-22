@@ -1,24 +1,26 @@
-import importlib
 from qiime2.plugin import (Plugin, Citations, Str, Int,
                            MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
-from q2_types.feature_data import FeatureData
 from . import read_count_threshold
+import q2_katharoseq
+
 
 citations = Citations.load('citations.bib', package='q2_katharoseq')
 
+
 plugin = Plugin(
     name='katharoseq',
-    version='0.0.1',
-    website='https://github.com/dpear/q2-katharoseq',
+    version=q2_katharoseq.__version__,
+    website='https://github.com/biocore/q2-katharoseq',
     package='q2_katharoseq',
-    description=('This QIIME 2 plugin implements the katharoseq '
+    description=('This QIIME 2 plugin implements the KatharoSeq '
                  'protocol for analyzing low biomass samles.'),
-    short_description='Plugin for katharoseq.',
+    short_description='Plugin for KatharoSeq.',
 )
 
+
 plugin.visualizers.register_function(
-    function=read_count_threshold, # NAME OF THE FUNCTION FOR USERS
+    function=read_count_threshold,
     inputs={
         'table': FeatureTable[Frequency]
     },
@@ -31,31 +33,30 @@ plugin.visualizers.register_function(
     },
     input_descriptions={
         'table': (
-            'Feature table of frequencies.'
-        )
+            'A FeatureTable collapsed to the genus level (level 6) that '
+            'contains the control samples.'
+        ),
     },
     parameter_descriptions={
         'control': (
-            'Environment used to calculate reads aligning to mock '
-            'community. Available options are '
-            '(atcc, zymobiomics, classic).'
+            'The type of positive control used.'
         ),
         'threshold': (
             'Threshold to use in calculating minimum frequency. '
             'Must be int in [0,100].'
         ),
         'positive_control_value': (
-            'Value that indicates a positive control.'
+            'The value in the control column that demarks which samples are '
+            'the positive controls.'
         ),
         'positive_control_column': (
-            'Column that contains positive controls.'
-        ),
-        'cell_count_column': (
-            'Column that contains cell count information. '
-            'Used to normalize '
+            'The column in the sample metadata that describes which samples '
+            'are and are not controls.'
         ),
     },
-    name='katharoseq',
-    description='Katharoseq protocol for analyzing low biomass samples.',
-    citations=[]
+    name='Methods for the application of the KatharoSeq protocol',
+    description='KatharoSeq is high-throughput protocol combining laboratory '
+                'and bioinformatic methods that can differentiate a true '
+                'positive signal in samples with as few as 50 to 500 cells.',
+    citations=[citations['minich2018']]
 )
