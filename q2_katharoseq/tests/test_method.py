@@ -7,9 +7,13 @@ import qiime2
 from qiime2 import CategoricalMetadataColumn
 from qiime2 import NumericMetadataColumn
 
-from q2_katharoseq import read_count_threshold
+from q2_katharoseq import read_count_threshold, estimating_biomass
 from q2_katharoseq import allosteric_sigmoid
 from q2_katharoseq import get_threshold
+
+from os.path import dirname, abspath, join
+from inspect import currentframe, getfile
+
 
 class KatharoSeqTestCase(TestCase):
 
@@ -23,7 +27,8 @@ class KatharoSeqTestCase(TestCase):
             ['a', 'b', 'a', 'b'],
             index=ind,
             name='positive_control_column')
-        self.positive_control_column = CategoricalMetadataColumn(positive_control_column)
+        self.positive_control_column = CategoricalMetadataColumn(
+            positive_control_column)
 
         cell_count_column = pd.Series(
             [1, 2, 3, 4],
@@ -104,7 +109,8 @@ class KatharoSeqTestCase(TestCase):
                     ['not_a', 'b', 'not_a', 'b'],  # change 'a'
                     index=ind,
                     name='positive_control_column')
-        positive_control_column = CategoricalMetadataColumn(positive_control_column)
+        positive_control_column = CategoricalMetadataColumn(
+            positive_control_column)
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
@@ -164,6 +170,33 @@ class KatharoSeqTestCase(TestCase):
         thresh = 50
         min_freq = get_threshold(r1, r2, thresh)
         self.assertTrue(min_freq == 37)
+
+    def test_estimating_biomass(self):
+        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+        data = pd.read_csv(
+            f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
+                'sample_name': str, 'total_reads': float,
+                'control_cell_into_extraction': float,
+                'extraction_mass_g': float,
+                'positive_control': str})
+        data.set_index('sample_name', inplace=True)
+
+        obs = estimating_biomass(
+            total_reads=qiime2.NumericMetadataColumn(data['total_reads']),
+            control_cell_extraction=qiime2.NumericMetadataColumn(
+                data['control_cell_into_extraction']),
+            min_total_reads=1150,
+            positive_control_value='True',
+            positive_control_column=qiime2.CategoricalMetadataColumn(
+                data['positive_control']),
+            pcr_template_vol=5,
+            dna_extract_vol=60,
+            extraction_mass_g=qiime2.NumericMetadataColumn(
+                data['extraction_mass_g'])
+        )
+        exp = pd.read_csv(
+            f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
+        pd.testing.assert_frame_equal(obs, exp)
 
 
 if __name__ == '__main__':

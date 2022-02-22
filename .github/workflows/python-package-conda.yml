@@ -29,11 +29,12 @@ jobs:
       run: |
         conda install pytest
         pytest
+
     - name: Coveralls
-        uses: AndreMiras/coveralls-python-action@develop
-        with:
-          parallel: false
-          flag-name: Unit Test
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
   lint:
     runs-on: ubuntu-latest
     steps:
