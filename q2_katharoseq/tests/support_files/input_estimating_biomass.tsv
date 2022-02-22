@@ -1,5 +1,5 @@
 sample_name	total_reads	control_cell_into_extraction	extraction_mass_g	positive_control
-#q2:types	numeric	numeric	categorical	categorical
+#q2:types	numeric	numeric	numeric	categorical
 13414.plate1.h9	4			False
 13414.plate1.b10	6			False
 13414.plate1.e12	6			False
