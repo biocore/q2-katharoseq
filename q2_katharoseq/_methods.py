@@ -134,8 +134,8 @@ def read_count_threshold(
 
     # FIND THRESHOLD
     min_freq = get_threshold(katharo['log_asv_reads'],
-                          katharo['correct_assign'],
-                          threshold/100)
+                             katharo['correct_assign'],
+                             threshold/100)
 
     # VISUALIZER
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
@@ -168,8 +168,8 @@ def estimating_biomass(
         positive_control_column == positive_control_value]
     positive_controls = filtered.loc[positive_controls.index]
 
-    positive_controls['control_cell_extraction'] = control_cell_extraction.to_series().loc[
-        positive_controls.index]
+    positive_controls['control_cell_extraction'] = \
+        control_cell_extraction.to_series().loc[positive_controls.index]
     positive_controls['log_control_cell_extraction'] = \
         positive_controls.control_cell_extraction.apply(math.log10)
 
