@@ -8,8 +8,8 @@ from qiime2 import CategoricalMetadataColumn
 from qiime2 import NumericMetadataColumn
 
 from q2_katharoseq import read_count_threshold, estimating_biomass
-from q2_katharoseq import allosteric_sigmoid
-from q2_katharoseq import get_threshold
+from q2_katharoseq._methods import allosteric_sigmoid
+from q2_katharoseq._methods import get_threshold
 
 from os.path import dirname, abspath, join
 from inspect import currentframe, getfile
