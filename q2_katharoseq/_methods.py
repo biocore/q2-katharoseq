@@ -111,7 +111,7 @@ def read_count_threshold(
     df['correct_assign'] = df['control_reads'] / df['asv_reads']
 
     # DEFINE KATHARO
-    katharo = df[['correct_assign', 'control_reads', 'asv_reads']]
+    katharo = df[['correct_assign', 'control_reads', 'asv_reads']].copy()
     katharo['log_asv_reads'] = np.log10(katharo['asv_reads'].values)
 
     # FIT CURVE TO DATA
