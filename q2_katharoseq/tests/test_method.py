@@ -18,7 +18,6 @@ from inspect import currentframe, getfile
 class KatharoSeqTestCase(TestCase):
 
     def setUp(self):
-
         self.output_dir = '.'
         self.positive_control_value = 'a'
         ind = pd.Index(['s1', 's2', 's3', 's4'],
@@ -55,7 +54,6 @@ class KatharoSeqTestCase(TestCase):
         self.threshold = 50
 
     def test_outputs_index(self):
-
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
                 output_dir,
@@ -70,7 +68,6 @@ class KatharoSeqTestCase(TestCase):
             self.assertTrue(os.path.exists(index_fp))
 
     def test_invalid_threshold(self):
-
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
                 ValueError,
@@ -102,7 +99,6 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_col(self):
-
         ind = pd.Index(['s1', 's2', 's3', 's4'],
                        name='sampleid')
         positive_control_column = pd.Series(
@@ -128,7 +124,6 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_table(self):
-
         ind = pd.Index(
                 ['s5', 's6', 's7', 's8'],
                 name='sampleid')
@@ -156,7 +151,6 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_sigmoid(self):
-
         x = 1
         h = 2
         k_prime = 3
@@ -164,7 +158,6 @@ class KatharoSeqTestCase(TestCase):
         self.assertTrue(a == .25)
 
     def test_threshold(self):
-
         r1 = 2
         r2 = 3
         thresh = 50
