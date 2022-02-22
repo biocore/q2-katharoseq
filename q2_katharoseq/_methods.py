@@ -179,11 +179,10 @@ def estimating_biomass(
         positive_controls.log_control_cell_extraction)
 
     filtered['estimated_biomass_per_pcrrxn'] = \
-        10**filtered.log_total_reads*lm.coef_[0]+lm.intercept_
+        10**((filtered.log_total_reads*lm.coef_[0])+lm.intercept_)
     filtered['estimated_biomass_per_dnarxn'] = \
         filtered.estimated_biomass_per_pcrrxn*(
             dna_extract_vol/pcr_template_vol)
-
 
     filtered['extraction_mass_g'] = extraction_mass_g.to_series().loc[
         filtered.index]
