@@ -31,9 +31,11 @@ jobs:
         pip install -e . --no-deps
     - name: Lint with flake8
       run: |
+        source activate test-env
         flake8 q2_katharoseq
     - name: Test with pytest
       run: |
+        source activate test-env
         pytest
 
     - name: Coveralls
