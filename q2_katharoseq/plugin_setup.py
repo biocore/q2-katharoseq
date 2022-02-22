@@ -1,9 +1,8 @@
-import importlib
 from qiime2.plugin import (Plugin, Citations, Str, Int,
                            MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
-from q2_types.feature_data import FeatureData
 from . import read_count_threshold
+import q2_katharoseq
 
 
 citations = Citations.load('citations.bib', package='q2_katharoseq')
