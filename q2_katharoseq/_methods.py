@@ -156,7 +156,7 @@ def estimating_biomass(
         positive_control_column: qiime2.CategoricalMetadataColumn,
         pcr_template_vol: int,
         dna_extract_vol: int,
-        extraction_mass_g: qiime2.CategoricalMetadataColumn) -> pd.DataFrame:
+        extraction_mass_g: qiime2.NumericMetadataColumn) -> pd.DataFrame:
 
     total_reads = total_reads.to_series()
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])

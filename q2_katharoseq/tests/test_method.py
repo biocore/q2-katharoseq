@@ -166,6 +166,7 @@ class KatharoSeqTestCase(TestCase):
 
     def test_estimating_biomass(self):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+
         data = pd.read_csv(
             f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
                 'sample_name': str, 'total_reads': float,
@@ -173,18 +174,17 @@ class KatharoSeqTestCase(TestCase):
                 'extraction_mass_g': float,
                 'positive_control': str})
 
+        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+
         obs = estimating_biomass(
-            total_reads=qiime2.NumericMetadataColumn(data['total_reads']),
-            control_cell_extraction=qiime2.NumericMetadataColumn(
-                data['control_cell_into_extraction']),
+            total_reads=data.get_column('total_reads'),
+            control_cell_extraction=data.get_column('control_cell_into_extraction'),  # noqa
             min_total_reads=1150,
             positive_control_value='True',
-            positive_control_column=qiime2.CategoricalMetadataColumn(
-                data['positive_control']),
+            positive_control_column=data.get_column('positive_control'),
             pcr_template_vol=5,
             dna_extract_vol=60,
-            extraction_mass_g=qiime2.NumericMetadataColumn(
-                data['extraction_mass_g'])
+            extraction_mass_g=data.get_column('extraction_mass_g')
         )
         exp = pd.read_csv(
             f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
