@@ -172,7 +172,6 @@ class KatharoSeqTestCase(TestCase):
                 'control_cell_into_extraction': float,
                 'extraction_mass_g': float,
                 'positive_control': str})
-        data.set_index('sample_name', inplace=True)
 
         obs = estimating_biomass(
             total_reads=qiime2.NumericMetadataColumn(data['total_reads']),
@@ -190,6 +189,9 @@ class KatharoSeqTestCase(TestCase):
         exp = pd.read_csv(
             f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
+        index_fp = os.path.join(output_dir, 'index.html')
+        self.assertTrue(os.path.exists(index_fp))
+
 
 
 if __name__ == '__main__':
