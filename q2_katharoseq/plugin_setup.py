@@ -78,15 +78,22 @@ plugin.methods.register_function(
                 'control_cell_extraction': MetadataColumn[Numeric],
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
-                'extraction_mass_g': MetadataColumn[Categorical],
+                'extraction_mass_g': MetadataColumn[Numeric],
                 'min_total_reads': Int,
                 'pcr_template_vol': Int,
                 'dna_extract_vol': Int},
     outputs=[('estimated_biomass', EstimatedBiomass)],
     input_descriptions={},
     parameter_descriptions={
-        'total_reads': 'The total reads present in each sample.',
-        'control_cell_extraction': 'The number of cells in the controls.',
+        'total_reads': 'The total sum of the reads or ASVs for each sample.',
+        'control_cell_extraction': (
+            'The estimated number of cells or genomes used as input to your '
+            'library prep. One may typically estimate this by determining the '
+            'total number of cells from a stock solution used to make '
+            'standard titrations. Each titration will have an estimated '
+            'number of microbial cells put into the extraction. The final '
+            'estimate will depend on the elution volume and the final volume '
+            'used into the library prep (e.g. 16S PCR).'),
         'positive_control_column': (
             'The column in the sample metadata that describes which samples '
             'are and are not controls.'),
@@ -94,11 +101,15 @@ plugin.methods.register_function(
             'The value in the control column that demarks which samples are '
             'the positive controls.'),
         'extraction_mass_g': (
-            'The column in the sample metadata that describes the extraction '
-            'mass for the controls'),
+            'The column in the sample metadata that describes the sample '
+            '(e.g. stool, tissue, soil, etc) mass (in grams - typically '
+            'converted from mg)'),
         'min_total_reads': 'The minimum threshold to apply.',
-        'pcr_template_vol': 'The PCR template volume.',
-        'dna_extract_vol': 'The DNA extraction volume.'},
+        'pcr_template_vol': (
+            'The volume of DNA used as template in the '
+            'library prep (PCR reaction)'),
+        'dna_extract_vol': (
+            'The final elution volume used during DNA extraction')},
     output_descriptions={
         'estimated_biomass': (
             'A dataframe containing the details on estimated biomass')
