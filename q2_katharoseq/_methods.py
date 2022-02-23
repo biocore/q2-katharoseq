@@ -191,4 +191,28 @@ def estimating_biomass(
     filtered['log_estimated_cells_per_g'] = \
         filtered.estimated_cells_per_g.apply(math.log10)
 
+    # MAKE PLOT
+    y = positive_controls['log_control_cell_extraction']
+    x = positive_controls['log_total_reads']
+    intercept = lm.intercept_
+    slope = lm.coef_[0]
+
+    plt.clf()
+    plt.scatter(x,y, color='black')
+    axes = plt.gca()
+    x_vals = np.array(axes.get_xlim())
+    y_vals = intercept + slope * x_vals
+    plt.plot(x_vals, y_vals, '--')
+    plt.xlabel('Log reads')
+    plt.ylabel('Log cells')
+    plt.savefig(os.path.join(output_dir, 'fit.svg'))
+    plt.close()
+
+    # VISUALIZER
+    context = {'r_squared': r_squared}
+    TEMPLATES = pkg_resources.resource_filename(
+        'q2_katharoseq', 'estimating_biomass_assets')
+    index = os.path.join(TEMPLATES, 'index.html')
+    q2templates.render(index, output_dir, context=context)
+
     return filtered
