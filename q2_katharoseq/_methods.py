@@ -208,7 +208,8 @@ def estimating_biomass(
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
-    # VISUALIZER
+
+    # VISUALIZER: git push origin visualizer
     context = {'r_squared': r_squared}
     TEMPLATES = pkg_resources.resource_filename(
         'q2_katharoseq', 'estimating_biomass_assets')
