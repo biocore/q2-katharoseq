@@ -189,9 +189,28 @@ class KatharoSeqTestCase(TestCase):
         exp = pd.read_csv(
             f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
-        index_fp = os.path.join(output_dir, 'index.html')
-        self.assertTrue(os.path.exists(index_fp))
 
+
+    def test_biomass_plot(self):
+        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+
+        data = pd.read_csv(
+            f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
+                'sample_name': str, 'total_reads': float,
+                'control_cell_into_extraction': float,
+                'extraction_mass_g': float,
+                'positive_control': str})
+
+        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+
+        biomass_plot(
+            total_reads=data.get_column('total_reads'),
+            control_cell_extraction=data.get_column('control_cell_into_extraction'),  # noqa
+            min_total_reads=1150,
+            positive_control_value='True',
+            positive_control_column=data.get_column('positive_control')
+        )
+        self.assertTrue(os.path.exists(index_fp))
 
 
 if __name__ == '__main__':
