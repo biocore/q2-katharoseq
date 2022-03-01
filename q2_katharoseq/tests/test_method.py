@@ -15,6 +15,7 @@ from os.path import dirname, abspath, join
 from inspect import currentframe, getfile
 
 
+
 class KatharoSeqTestCase(TestCase):
 
     def setUp(self):
@@ -53,7 +54,7 @@ class KatharoSeqTestCase(TestCase):
         self.control = 'classic'
         self.threshold = 50
 
-    def test_outputs_index(self):
+    def test_outputs_index(self): # OK
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
                 output_dir,
@@ -67,7 +68,7 @@ class KatharoSeqTestCase(TestCase):
             index_fp = os.path.join(output_dir, 'index.html')
             self.assertTrue(os.path.exists(index_fp))
 
-    def test_invalid_threshold(self):
+    def test_invalid_threshold(self): # OK 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
                 ValueError,
@@ -98,7 +99,7 @@ class KatharoSeqTestCase(TestCase):
                 self.table,
                 self.control)
 
-    def test_no_positive_controls_in_col(self):
+    def test_no_positive_controls_in_col(self): # OK
         ind = pd.Index(['s1', 's2', 's3', 's4'],
                        name='sampleid')
         positive_control_column = pd.Series(
@@ -123,7 +124,7 @@ class KatharoSeqTestCase(TestCase):
                 self.table,
                 self.control)
 
-    def test_no_positive_controls_in_table(self):
+    def test_no_positive_controls_in_table(self): # OK
         ind = pd.Index(
                 ['s5', 's6', 's7', 's8'],
                 name='sampleid')
@@ -150,29 +151,32 @@ class KatharoSeqTestCase(TestCase):
                 table,
                 self.control)
 
-    def test_sigmoid(self):
-        x = 1
-        h = 2
-        k_prime = 3
+    def test_sigmoid(self): # OK
+        x = 1.0
+        h = 2.0
+        k_prime = 3.0
         a = allosteric_sigmoid(x, h, k_prime)
         self.assertTrue(a == .25)
 
-    def test_threshold(self):
-        r1 = 2
-        r2 = 3
-        thresh = 50
+    def test_threshold(self): # OK
+        r1 = [3.5, 2.3, 1.3, 3.4]
+        r2 = [1.1, 2.2, 1.7, 2.3]
+        thresh = 50.0
         min_freq = get_threshold(r1, r2, thresh)
-        self.assertTrue(min_freq == 37)
+        self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = pd.read_csv(
-            f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
-                'sample_name': str, 'total_reads': float,
-                'control_cell_into_extraction': float,
-                'extraction_mass_g': float,
-                'positive_control': str})
+        # One line at top of file describing dtype that throws this off
+        # data = pd.read_csv(
+        #     f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
+        #         'sample_name': str, 'total_reads': float,
+        #         'control_cell_into_extraction': float,
+        #         'extraction_mass_g': float,
+        #         'positive_control': str})
+
+
 
         data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
 
