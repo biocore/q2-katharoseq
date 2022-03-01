@@ -191,6 +191,36 @@ def estimating_biomass(
     filtered['log_estimated_cells_per_g'] = \
         filtered.estimated_cells_per_g.apply(math.log10)
 
+    return filtered
+
+def biomass_plot(
+        output_dir: str,
+        total_reads: qiime2.NumericMetadataColumn,
+        control_cell_extraction: qiime2.NumericMetadataColumn,
+        min_total_reads: int,
+        positive_control_value: str,
+        positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
+
+    total_reads = total_reads.to_series()
+    filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
+
+    positive_control_column = positive_control_column.to_series().loc[
+        filtered.index]
+    positive_controls = positive_control_column[
+        positive_control_column == positive_control_value]
+    positive_controls = filtered.loc[positive_controls.index]
+
+    positive_controls['control_cell_extraction'] = \
+        control_cell_extraction.to_series().loc[positive_controls.index]
+    positive_controls['log_control_cell_extraction'] = \
+        positive_controls.control_cell_extraction.apply(math.log10)
+
+    lm = LinearRegression()
+    lm.fit(
+        positive_controls.log_total_reads.values.reshape(-1, 1),
+        positive_controls.log_control_cell_extraction)
+
     # MAKE PLOT
     y = positive_controls['log_control_cell_extraction']
     x = positive_controls['log_total_reads']
@@ -208,12 +238,8 @@ def estimating_biomass(
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
-
     # VISUALIZER: git push origin visualizer
-    context = {'r_squared': r_squared}
     TEMPLATES = pkg_resources.resource_filename(
         'q2_katharoseq', 'estimating_biomass_assets')
     index = os.path.join(TEMPLATES, 'index.html')
-    q2templates.render(index, output_dir, context=context)
-
-    return filtered
+    q2templates.render(index, output_dir)
