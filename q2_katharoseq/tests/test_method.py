@@ -188,13 +188,6 @@ class KatharoSeqTestCase(TestCase):
     def test_biomass_plot(self):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = pd.read_csv(
-            f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
-                'sample_name': str, 'total_reads': float,
-                'control_cell_into_extraction': float,
-                'extraction_mass_g': float,
-                'positive_control': str})
-
         data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
 
         with tempfile.TemporaryDirectory() as output_dir:
