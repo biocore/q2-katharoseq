@@ -192,6 +192,7 @@ class KatharoSeqTestCase(TestCase):
 
         with tempfile.TemporaryDirectory() as output_dir:
             biomass_plot(
+                output_dir,
                 total_reads=data.get_column('total_reads'),
                 control_cell_extraction=data.get_column(
                     'control_cell_into_extraction'),  # noqa
