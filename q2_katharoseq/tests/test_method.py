@@ -7,7 +7,9 @@ import qiime2
 from qiime2 import CategoricalMetadataColumn
 from qiime2 import NumericMetadataColumn
 
-from q2_katharoseq import read_count_threshold, estimating_biomass
+from q2_katharoseq import (read_count_threshold,
+                           estimating_biomass,
+                           biomass_plot)
 from q2_katharoseq._methods import allosteric_sigmoid
 from q2_katharoseq._methods import get_threshold
 
@@ -151,28 +153,21 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_sigmoid(self):
-        x = 1
-        h = 2
-        k_prime = 3
+        x = 1.0
+        h = 2.0
+        k_prime = 3.0
         a = allosteric_sigmoid(x, h, k_prime)
         self.assertTrue(a == .25)
 
     def test_threshold(self):
-        r1 = 2
-        r2 = 3
-        thresh = 50
+        r1 = [3.5, 2.3, 1.3, 3.4]
+        r2 = [1.1, 2.2, 1.7, 2.3]
+        thresh = 50.0
         min_freq = get_threshold(r1, r2, thresh)
-        self.assertTrue(min_freq == 37)
+        self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
-
-        data = pd.read_csv(
-            f'{fp}/input_estimating_biomass.tsv', sep='\t', dtype={
-                'sample_name': str, 'total_reads': float,
-                'control_cell_into_extraction': float,
-                'extraction_mass_g': float,
-                'positive_control': str})
 
         data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
 
@@ -189,9 +184,25 @@ class KatharoSeqTestCase(TestCase):
         exp = pd.read_csv(
             f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
-        index_fp = os.path.join(output_dir, 'index.html')
-        self.assertTrue(os.path.exists(index_fp))
 
+    def test_biomass_plot(self):
+        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+
+        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+
+        with tempfile.TemporaryDirectory() as output_dir:
+            biomass_plot(
+                output_dir,
+                total_reads=data.get_column('total_reads'),
+                control_cell_extraction=data.get_column(
+                    'control_cell_into_extraction'),  # noqa
+                min_total_reads=1150,
+                positive_control_value='True',
+                positive_control_column=data.get_column('positive_control')
+            )
+
+            index_fp = os.path.join(output_dir, 'index.html')
+            self.assertTrue(os.path.exists(index_fp))
 
 
 if __name__ == '__main__':
