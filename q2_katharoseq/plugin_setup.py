@@ -219,7 +219,7 @@ plugin.visualizers.register_function(
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
                 'min_total_reads': Int
-    },
+                },
     input_descriptions={},
     parameter_descriptions={
         'total_reads': 'The total sum of the reads or ASVs for each sample.',
