@@ -193,6 +193,7 @@ def estimating_biomass(
 
     return filtered
 
+
 def biomass_plot(
         output_dir: str,
         total_reads: qiime2.NumericMetadataColumn,
@@ -228,7 +229,7 @@ def biomass_plot(
     slope = lm.coef_[0]
 
     plt.clf()
-    plt.scatter(x,y, color='black')
+    plt.scatter(x, y, color='black')
     axes = plt.gca()
     x_vals = np.array(axes.get_xlim())
     y_vals = intercept + slope * x_vals
