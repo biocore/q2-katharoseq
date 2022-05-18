@@ -1,8 +1,8 @@
 name: Python Package using Conda
 
 on:
-  push
-  pull_request
+  push:
+  pull_request:
 
 jobs:
   build-linux:
