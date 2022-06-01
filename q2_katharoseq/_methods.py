@@ -10,6 +10,46 @@ import math
 from sklearn.linear_model import LinearRegression
 
 
+control_type = {
+    'atcc': [
+        'd__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;'
+        'f__Clostridiaceae;g__Clostridium',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Enterobacterales;f__Enterobacteriaceae;__',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Enterobacterales;f__Enterobacteriaceae;'
+        'g__Escherichia-Shigella',
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Staphylococcales;'
+        'f__Staphylococcaceae;g__Staphylococcus'],
+    'zymobiomics': [
+        'd__Bacteria;p__Firmicutes;c__Bacilli;'
+        'o__Lactobacillales;f__Listeriaceae;g__Listeria',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Pseudomonadales;f__Pseudomonadaceae;g__Pseudomonas',
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;'
+        'f__Bacillaceae;g__Bacillus',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Enterobacterales;f__Enterobacteriaceae;__',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Enterobacterales;f__Enterobacteriaceae;'
+        'g__Escherichia-Shigella',
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;'
+        'f__Lactobacillaceae;g__Lactobacillus',
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;'
+        'f__Enterococcaceae;g__Enterococcus',
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Staphylococcales'
+        ';f__Staphylococcaceae;g__Staphylococcus'],
+    'classic': [
+        'd__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;'
+        'f__Bacillaceae;g__Bacillus',
+        'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;'
+        'o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus'],
+    'single': [
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
+        'o__Burkholderiales;f__Comamonadaceae;g__Variovorax']
+}
+
+
 # Define the allosteric sigmoid equation
 def allosteric_sigmoid(x, h, k_prime):
     y = x ** h / (k_prime + x ** h)
@@ -65,41 +105,6 @@ def read_count_threshold(
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
     max_inputT = max_inputT.sort_values(ascending=False).head(10)
-    control_type = {
-        'atcc': [
-            'd__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;'
-            'f__Clostridiaceae;g__Clostridium',
-            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-            'o__Enterobacterales;f__Enterobacteriaceae;__',
-            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-            'o__Enterobacterales;f__Enterobacteriaceae;'
-            'g__Escherichia-Shigella',
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Staphylococcales;'
-            'f__Staphylococcaceae;g__Staphylococcus'],
-        'zymobiomics': [
-            'd__Bacteria;p__Firmicutes;c__Bacilli;'
-            'o__Lactobacillales;f__Listeriaceae;g__Listeria',
-            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-            'o__Pseudomonadales;f__Pseudomonadaceae;g__Pseudomonas',
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;'
-            'f__Bacillaceae;g__Bacillus',
-            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-            'o__Enterobacterales;f__Enterobacteriaceae;__',
-            'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-            'o__Enterobacterales;f__Enterobacteriaceae;'
-            'g__Escherichia-Shigella',
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;'
-            'f__Lactobacillaceae;g__Lactobacillus',
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Lactobacillales;'
-            'f__Enterococcaceae;g__Enterococcus',
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Staphylococcales'
-            ';f__Staphylococcaceae;g__Staphylococcus'],
-        'classic': [
-            'd__Bacteria;p__Firmicutes;c__Bacilli;o__Bacillales;'
-            'f__Bacillaceae;g__Bacillus',
-            'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;'
-            'o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus']
-    }
 
     # Calculate the total number of reads per sample
     df['asv_reads'] = df.sum(axis=1)

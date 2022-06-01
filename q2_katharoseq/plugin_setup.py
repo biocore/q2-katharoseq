@@ -2,7 +2,8 @@ import importlib
 from qiime2.plugin import (Plugin, Citations, Str, Int,
                            MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
-from . import read_count_threshold, estimating_biomass, biomass_plot
+from . import (read_count_threshold, estimating_biomass, biomass_plot,
+               control_type)
 import q2_katharoseq
 from q2_katharoseq._type import EstimatedBiomass
 from q2_katharoseq._format import EstimatedBiomassFmt, EstimatedBiomassDirFmt
@@ -34,7 +35,7 @@ plugin.visualizers.register_function(
         'table': FeatureTable[Frequency]
     },
     parameters={
-        'control': Str % Choices(['zymobiomics', 'classic', 'atcc']),
+        'control': Str % Choices(control_type.keys()),
         'threshold': Int,
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],

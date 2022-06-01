@@ -10,7 +10,7 @@ Installation assumes a working QIIME 2 environment with a minimum version of 202
 git clone https://github.com/biocore/q2-katharoseq.git
 cd q2-katharoseq
 pip install -e .
-``` 
+```
 
 ## Use
 
@@ -24,6 +24,7 @@ classification, and the [`q2-taxa`](https://docs.qiime2.org/2021.11/plugins/avai
 ```
 qiime katharoseq read_count_threshold \
     --i-table a_genus_level_table.qza \
+    --p-threshold 80 \
     --p-control classic \
     --p-positive-control-value name_of_controls_in_metadata \
     --m-positive-control-column-file your_metadata.tsv \
@@ -32,4 +33,3 @@ qiime katharoseq read_count_threshold \
     --m-cell-count-column-column cell_count_variable_in_metadata \
     --o-visualization result.qzv
 ```
-
