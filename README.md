@@ -23,7 +23,7 @@ classification, and the [`q2-taxa`](https://docs.qiime2.org/2021.11/plugins/avai
 
 ```
 qiime katharoseq read_count_threshold \
-    --i-table a_genus_level_table.qza \
+    --i-table example.qza \ # a_genus_level_table
     --p-threshold 80 \
     --p-control classic \
     --p-positive-control-value name_of_controls_in_metadata \
