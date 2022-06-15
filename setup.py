@@ -26,6 +26,7 @@ setup(
     },
     package_data={
         "q2_katharoseq": ['citations.bib'],
+        "example": ['*']
     },
     zip_safe=False,
     install_requires=['scipy',
