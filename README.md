@@ -21,11 +21,11 @@ classification, and the [`q2-taxa`](https://docs.qiime2.org/2021.11/plugins/avai
 ## Obtaining a read count threshold
 
 Computation of a minimum read count threshold can be performed with the
-`read_count_threshold` plugin action. Test data can be found under the `testdata` folder.
+`read_count_threshold` plugin action. Test data can be found under the `example ` folder.
 
 ```
 qiime katharoseq read_count_threshold \
-    --i-table example/example_table_genus.qza  \ # a genus level table
+    --i-table example/example_table_genus.qza \ # a genus level table
     --p-threshold 80 \
     --p-control classic \
     --p-positive-control-value katharoseq_control \ # name of controls in metadata
@@ -35,14 +35,4 @@ qiime katharoseq read_count_threshold \
     --m-cell-count-column-column max_cell_count \ # cell count variable in metadata
     --o-visualization result.qzv
 ```
-qiime katharoseq read_count_threshold \
-    --i-table example.qza \ # a_genus_level_table
-    --p-threshold 80 \
-    --p-control classic \
-    --p-positive-control-value name_of_controls_in_metadata \
-    --m-positive-control-column-file your_metadata.tsv \
-    --m-positive-control-column-column sample_type_variable_in_metadata \
-    --m-cell-count-column-file your_metadata.tsv \
-    --m-cell-count-column-column cell_count_variable_in_metadata \
-    --o-visualization result.qzv
-```
+
