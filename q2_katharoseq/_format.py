@@ -16,6 +16,10 @@ class EstimatedBiomassFmt(model.TextFileFormat):
         hdr = line.strip().split(',')
 
         return hdr == STATS_HEADER
+        
+    def validate(self, *args):
+        pass
+
 
 
 EstimatedBiomassDirFmt = model.SingleFileDirectoryFormat(

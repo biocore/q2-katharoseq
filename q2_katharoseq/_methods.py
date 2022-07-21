@@ -115,6 +115,10 @@ def read_count_threshold(
     # PERCENT CORRECTLY ASSIGNED
     df['correct_assign'] = df['control_reads'] / df['asv_reads']
 
+    # SAVE FOR DOWNLOAD (THIS MAY CHANGE)
+    df_file = os.path.join(output_dir, 'results.tsv')
+    df.to_csv(df_file)
+
     # DEFINE KATHARO
     katharo = df[['correct_assign', 'control_reads', 'asv_reads']].copy()
     katharo['log_asv_reads'] = np.log10(katharo['asv_reads'].values)
@@ -146,7 +150,8 @@ def read_count_threshold(
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
     context = {'minimum_frequency': min_freq,
                'threshold': threshold,
-               'table': max_input_html}
+               'table': max_input_html
+               'results': df}
     TEMPLATES = pkg_resources.resource_filename(
         'q2_katharoseq', 'read_count_threshold_assets')
     index = os.path.join(TEMPLATES, 'index.html')
