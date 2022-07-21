@@ -23,7 +23,6 @@ In order to obtain a read count threshold, computation of a minimum read count t
 `read-count-threshold` plugin action. Test data can be found under the `example` folder.
 
 ```
-meta=example/fmp_metadata.tsv
 qiime katharoseq read-count-threshold \
     --i-table example/fmp_collapsed_table.qza \
     --m-positive-control-column-file example/fmp_metadata.tsv \
@@ -42,19 +41,18 @@ qiime katharoseq read-count-threshold \
  
 ```
 qiime katharoseq estimating-biomass \
-    --m-control-cell-extraction-file example/result.tsv \
-    --m-total-reads-file example/result.tsv \
-    --p-min-total-reads 1000 \
-    --m-positive-control-column-file example/result.tsv \
-    --p-pcr-template-vol 6 \
-    --p-dna-extract-vol 6 \
-    --m-extraction-mass-g-file example/result.tsv \
-    --p-positive-control-value control_rct \
+    --i-table example/152771_collapsed_table.qza \
+    --m-control-cell-extraction-file example/fmp_metadata.tsv \
     --m-control-cell-extraction-column control_cell_into_extraction \
-    --m-total-reads-column total_reads_RCT \
+    --p-min-total-reads 1315 \
+    --p-positive-control-value control \
+    --m-positive-control-column-file example/fmp_metadata.tsv \
     --m-positive-control-column-column control_rct \
+    --p-pcr-template-vol 5 \
+    --p-dna-extract-vol 60 \
     --m-extraction-mass-g-column extraction_mass_g \
-    --o-estimated-biomass estimated-biomass-output
+    --m-extraction-mass-g-file example/fmp_metadata.tsv \
+    --o-estimated-biomass estimated_biomass_fmp_rct
 ```
 
 ## Biomass Plot
@@ -62,7 +60,6 @@ qiime katharoseq estimating-biomass \
 Finally in order to visualize the results from `estimating-biomass`, run `biomass-plot`.
 
 ```
-meta=example/fmp_metadata_mod.tsv
 qiime katharoseq biomass-plot \
     --i-table example/fmp_collapsed_table.qza \
     --m-control-cell-extraction-file example/fmp_metadata_mod.tsv \
