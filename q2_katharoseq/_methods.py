@@ -9,7 +9,6 @@ import pkg_resources
 import math
 from sklearn.linear_model import LinearRegression
 
-
 control_type = {
     'atcc': [
         'd__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;'
@@ -91,7 +90,10 @@ def read_count_threshold(
 
     # CHECK SHAPES
     try:
-        table_positive = table.loc[set(positive_controls.index)]
+        control_ind = set(positive_controls.index)
+        table_ind = set(table.index)
+        inds = [x for x in control_ind if x in table_ind]
+        table_positive = table.loc[inds]
     except KeyError:
         raise KeyError('No positive controls found in table.')
 
@@ -114,10 +116,6 @@ def read_count_threshold(
 
     # PERCENT CORRECTLY ASSIGNED
     df['correct_assign'] = df['control_reads'] / df['asv_reads']
-
-    # SAVE FOR DOWNLOAD (THIS MAY CHANGE)
-    df_file = os.path.join(output_dir, 'results.tsv')
-    df.to_csv(df_file)
 
     # DEFINE KATHARO
     katharo = df[['correct_assign', 'control_reads', 'asv_reads']].copy()
@@ -150,8 +148,7 @@ def read_count_threshold(
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
     context = {'minimum_frequency': min_freq,
                'threshold': threshold,
-               'table': max_input_html
-               'results': df}
+               'table': max_input_html}
     TEMPLATES = pkg_resources.resource_filename(
         'q2_katharoseq', 'read_count_threshold_assets')
     index = os.path.join(TEMPLATES, 'index.html')
@@ -159,7 +156,8 @@ def read_count_threshold(
 
 
 def estimating_biomass(
-        total_reads: qiime2.NumericMetadataColumn,
+        table: pd.DataFrame,
+        # total_reads: qiime2.NumericMetadataColumn,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
@@ -168,8 +166,10 @@ def estimating_biomass(
         dna_extract_vol: int,
         extraction_mass_g: qiime2.NumericMetadataColumn) -> pd.DataFrame:
 
-    total_reads = total_reads.to_series()
+    total_reads = table.sum(axis=1)
+    # total_reads = total_reads.to_series()
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
 
     positive_control_column = positive_control_column.to_series().loc[
@@ -206,14 +206,17 @@ def estimating_biomass(
 
 def biomass_plot(
         output_dir: str,
-        total_reads: qiime2.NumericMetadataColumn,
+        table: pd.DataFrame,
+        # total_reads: qiime2.NumericMetadataColumn,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
 
-    total_reads = total_reads.to_series()
+    total_reads = table.sum(axis=1)
+    # total_reads = total_reads.to_series()
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
 
     positive_control_column = positive_control_column.to_series().loc[

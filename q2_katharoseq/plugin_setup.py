@@ -1,5 +1,5 @@
 import importlib
-from qiime2.plugin import (Plugin, Citations, Str, Int, Metadata,
+from qiime2.plugin import (Plugin, Citations, Str, Int,
                            MetadataColumn, Categorical, Numeric, Choices)
 from q2_types.feature_table import (FeatureTable, Frequency)
 from . import (read_count_threshold, estimating_biomass, biomass_plot,
@@ -63,9 +63,6 @@ plugin.visualizers.register_function(
             'The column in the sample metadata that describes which samples '
             'are and are not controls.'
         ),
-        # 'metadata': (
-            # 'The metadata table associated with samples.'
-        # ),
     },
     name='Methods for the application of the KatharoSeq protocol',
     description='KatharoSeq is high-throughput protocol combining laboratory '
@@ -79,8 +76,7 @@ plugin.methods.register_function(
     inputs={
         'table': FeatureTable[Frequency],
     },
-    parameters={#'total_reads': MetadataColumn[Numeric],
-                'control_cell_extraction': MetadataColumn[Numeric],
+    parameters={'control_cell_extraction': MetadataColumn[Numeric],
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
                 'extraction_mass_g': MetadataColumn[Numeric],
@@ -95,7 +91,6 @@ plugin.methods.register_function(
         ),
     },
     parameter_descriptions={
-        # 'total_reads': 'The total sum of the reads or ASVs for each sample.',
         'control_cell_extraction': (
             'The estimated number of cells or genomes used as input to your '
             'library prep. One may typically estimate this by determining the '
@@ -134,8 +129,7 @@ plugin.visualizers.register_function(
     inputs={
         'table': FeatureTable[Frequency],
     },
-    parameters={#'total_reads': MetadataColumn[Numeric],
-                'control_cell_extraction': MetadataColumn[Numeric],
+    parameters={'control_cell_extraction': MetadataColumn[Numeric],
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
                 'min_total_reads': Int
@@ -147,7 +141,6 @@ plugin.visualizers.register_function(
         ),
     },
     parameter_descriptions={
-       # 'total_reads': 'The total sum of the reads or ASVs for each sample.',
         'control_cell_extraction': (
             'The estimated number of cells or genomes used as input to your '
             'library prep. One may typically estimate this by determining the '
