@@ -167,22 +167,26 @@ class KatharoSeqTestCase(TestCase):
         self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
-        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+        # fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+        # data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+        data = qiime2.Metadata.load('../example/fmp_metadata.tsv')
+        table = '../example/fmp_collapsed_table.qza'
+        table = qiime2.Artifact.load(table).view(pd.DataFrame)
 
         obs = estimating_biomass(
-            total_reads=data.get_column('total_reads'),
+            # total_reads=data.get_column('total_reads'),
+            table=table,
             control_cell_extraction=data.get_column('control_cell_into_extraction'),  # noqa
             min_total_reads=1150,
-            positive_control_value='True',
-            positive_control_column=data.get_column('positive_control'),
+            positive_control_value='control',
+            positive_control_column=data.get_column('control_rct'),
             pcr_template_vol=5,
             dna_extract_vol=60,
             extraction_mass_g=data.get_column('extraction_mass_g')
         )
-        exp = pd.read_csv(
-            f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
+
+        exp = pd.read_csv('../example/est_biomass_output.csv', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
 
     def test_biomass_plot(self):
