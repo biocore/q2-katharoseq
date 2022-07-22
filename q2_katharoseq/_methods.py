@@ -157,7 +157,6 @@ def read_count_threshold(
 
 def estimating_biomass(
         table: pd.DataFrame,
-        # total_reads: qiime2.NumericMetadataColumn,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
@@ -167,7 +166,6 @@ def estimating_biomass(
         extraction_mass_g: qiime2.NumericMetadataColumn) -> pd.DataFrame:
 
     total_reads = table.sum(axis=1)
-    # total_reads = total_reads.to_series()
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
     filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
@@ -201,20 +199,20 @@ def estimating_biomass(
     filtered['log_estimated_cells_per_g'] = \
         filtered.estimated_cells_per_g.apply(math.log10)
 
+    filtered.index.rename('sample_name', inplace=True)
+
     return filtered
 
 
 def biomass_plot(
         output_dir: str,
         table: pd.DataFrame,
-        # total_reads: qiime2.NumericMetadataColumn,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
 
     total_reads = table.sum(axis=1)
-    # total_reads = total_reads.to_series()
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
     filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
