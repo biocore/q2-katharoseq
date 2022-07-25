@@ -169,10 +169,11 @@ class KatharoSeqTestCase(TestCase):
         self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
-        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/fmp_metadata.tsv')
-        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza').view(pd.DataFrame)
+        data = qiime2.Metadata.load('../../example/fmp_metadata.tsv')
+        
+        table = '../../example/fmp_collapsed_table.qza'
+        table = qiime2.Artifact.load(table).view(pd.DataFrame)
 
         obs = estimating_biomass(
             # total_reads=data.get_column('total_reads'),
