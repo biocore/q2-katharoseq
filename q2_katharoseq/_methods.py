@@ -103,7 +103,7 @@ def read_count_threshold(
 
     # VISUAL CHECK: TOP 7 TAXA MAKE UP MOST OF THE
     # READS IN HIGHEST INPUT SAMPLE
-    max_cell_counts = cell_counts.idsxmax()
+    max_cell_counts = cell_counts.idxmax()
 
     if max_cell_counts not in df.index.values:
         raise KeyError('No positive controls found in table.')
