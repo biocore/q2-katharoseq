@@ -140,9 +140,9 @@ class KatharoSeqTestCase(TestCase):
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
-                ValueError,
+                KeyError,
                 'No positive controls found '
-                'in table. eeeeee'):
+                'in table.'):
 
             read_count_threshold(
                 output_dir,
