@@ -110,7 +110,6 @@ class KatharoSeqTestCase(TestCase):
         positive_control_column = CategoricalMetadataColumn(
             positive_control_column)
 
-
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
                 ValueError,
@@ -171,7 +170,7 @@ class KatharoSeqTestCase(TestCase):
     def test_estimating_biomass(self):
 
         data = qiime2.Metadata.load('../../example/fmp_metadata.tsv')
-        
+
         table = '../../example/fmp_collapsed_table.qza'
         table = qiime2.Artifact.load(table).view(pd.DataFrame)
 
@@ -194,7 +193,8 @@ class KatharoSeqTestCase(TestCase):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
         data = qiime2.Metadata.load(f'{fp}/fmp_metadata.tsv')
-        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza').view(pd.DataFrame)
+        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza')
+        table = table.view(pd.DataFrame)
 
         with tempfile.TemporaryDirectory() as output_dir:
             biomass_plot(
