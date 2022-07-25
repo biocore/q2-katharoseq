@@ -1,4 +1,4 @@
-,total_reads,log_total_reads,estimated_biomass_per_pcrrxn,estimated_biomass_per_dnarxn,extraction_mass_g,estimated_cells_per_g,log_estimated_cells_per_g
+sample_name,total_reads,log_total_reads,estimated_biomass_per_pcrrxn,estimated_biomass_per_dnarxn,extraction_mass_g,estimated_cells_per_g,log_estimated_cells_per_g
 13414.1.gill,66584.0,4.823369881624892,735394.6335136829,8824735.602164194,0.607,14538279.41048467,7.162513011285877
 13414.1.hg,4747.0,3.67641923171836,71.05890286117695,852.7068343341234,0.088,9689.850390160494,3.9863170716607415
 13414.1.midgut,24577.0,4.390528869479608,22457.429097906574,269489.1491748789,0.0818,3294488.3762210137,6.5177879795867035
