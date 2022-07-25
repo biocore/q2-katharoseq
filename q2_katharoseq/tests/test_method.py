@@ -110,6 +110,7 @@ class KatharoSeqTestCase(TestCase):
         positive_control_column = CategoricalMetadataColumn(
             positive_control_column)
 
+
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
                 ValueError,
@@ -126,6 +127,7 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_table(self):
+
         ind = pd.Index(
                 ['s5', 's6', 's7', 's8'],
                 name='sampleid')
@@ -139,9 +141,9 @@ class KatharoSeqTestCase(TestCase):
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
-                KeyError,
+                ValueError,
                 'No positive controls found '
-                'in table.'):
+                'in table. eeeeee'):
 
             read_count_threshold(
                 output_dir,
@@ -167,12 +169,10 @@ class KatharoSeqTestCase(TestCase):
         self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
-        # fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
+        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        # data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
-        data = qiime2.Metadata.load('../example/fmp_metadata.tsv')
-        table = '../example/fmp_collapsed_table.qza'
-        table = qiime2.Artifact.load(table).view(pd.DataFrame)
+        data = qiime2.Metadata.load(f'{fp}/fmp_metadata.tsv')
+        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza').view(pd.DataFrame)
 
         obs = estimating_biomass(
             # total_reads=data.get_column('total_reads'),
@@ -186,23 +186,24 @@ class KatharoSeqTestCase(TestCase):
             extraction_mass_g=data.get_column('extraction_mass_g')
         )
 
-        exp = pd.read_csv('../example/est_biomass_output.csv', index_col=0)
+        exp = pd.read_csv('../../example/est_biomass_output.csv', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
 
     def test_biomass_plot(self):
         fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+        data = qiime2.Metadata.load(f'{fp}/fmp_metadata.tsv')
+        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza').view(pd.DataFrame)
 
         with tempfile.TemporaryDirectory() as output_dir:
             biomass_plot(
                 output_dir,
-                total_reads=data.get_column('total_reads'),
+                table=table,
                 control_cell_extraction=data.get_column(
                     'control_cell_into_extraction'),  # noqa
                 min_total_reads=1150,
-                positive_control_value='True',
-                positive_control_column=data.get_column('positive_control')
+                positive_control_value='control',
+                positive_control_column=data.get_column('control_rct')
             )
 
             index_fp = os.path.join(output_dir, 'index.html')

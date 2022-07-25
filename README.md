@@ -41,7 +41,7 @@ qiime katharoseq read-count-threshold \
  
 ```
 qiime katharoseq estimating-biomass \
-    --i-table example/152771_collapsed_table.qza \
+    --i-table example/fmp_collapsed_table.qza \
     --m-control-cell-extraction-file example/fmp_metadata.tsv \
     --m-control-cell-extraction-column control_cell_into_extraction \
     --p-min-total-reads 1315 \

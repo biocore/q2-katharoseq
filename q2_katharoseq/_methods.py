@@ -79,31 +79,36 @@ def read_count_threshold(
     positive_control_column = positive_control_column.to_series()
     cell_count_column = cell_count_column.to_series()
 
-    # FILTER COLUMNS
+    # # FILTER COLUMNS
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
 
     if not positive_controls.shape[0]:
-        raise ValueError('No positive controls found in ' +
-                         'positive control column.')
+        raise KeyError('No positive controls found in ' +
+                            'positive control column.')
+    positive_controls = pd.Series(positive_controls)
+
     cell_counts = cell_count_column.loc[positive_controls.index]
 
-    # CHECK SHAPES
-    try:
-        control_ind = set(positive_controls.index)
-        table_ind = set(table.index)
-        inds = [x for x in control_ind if x in table_ind]
-        table_positive = table.loc[inds]
-    except KeyError:
+    # # CHECK SHAPES
+    inds = positive_controls.index.intersection(table.index)
+    print(inds)
+    if len(inds)==0:
         raise KeyError('No positive controls found in table.')
+    table_positive = table.loc[inds]
 
     if threshold > 100 or threshold < 0:
         raise ValueError('Threshold must be between 0 and 100.')
     df = table_positive
 
+
     # VISUAL CHECK: TOP 7 TAXA MAKE UP MOST OF THE
     # READS IN HIGHEST INPUT SAMPLE
-    max_cell_counts = cell_counts.idxmax()
+    max_cell_counts = cell_counts.idsxmax()
+
+    if max_cell_counts not in df.index.values:
+        raise KeyError('No positive controls found in table.')
+
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
     max_inputT = max_inputT.sort_values(ascending=False).head(10)
@@ -123,16 +128,16 @@ def read_count_threshold(
 
     # FIT CURVE TO DATA
     popt, pcov = curve_fit(allosteric_sigmoid,
-                           katharo['log_asv_reads'],
-                           katharo['correct_assign'],
-                           method='dogbox')
+                            katharo['log_asv_reads'],
+                            katharo['correct_assign'],
+                            method='dogbox')
 
     # PLOT
     x = np.linspace(0, 5, 50)
     y = allosteric_sigmoid(x, *popt)
     plt.plot(katharo['log_asv_reads'],
-             katharo['correct_assign'],
-             'o', label='data')
+                katharo['correct_assign'],
+                'o', label='data')
     plt.plot(x, y, label='fit')
     plt.ylim(0, 1.05)
     plt.legend(loc='best')
@@ -141,14 +146,14 @@ def read_count_threshold(
 
     # FIND THRESHOLD
     min_freq = get_threshold(katharo['log_asv_reads'],
-                             katharo['correct_assign'],
-                             threshold/100)
+                                katharo['correct_assign'],
+                                threshold/100)
 
     # VISUALIZER
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
     context = {'minimum_frequency': min_freq,
-               'threshold': threshold,
-               'table': max_input_html}
+                'threshold': threshold,
+                'table': max_input_html}
     TEMPLATES = pkg_resources.resource_filename(
         'q2_katharoseq', 'read_count_threshold_assets')
     index = os.path.join(TEMPLATES, 'index.html')
