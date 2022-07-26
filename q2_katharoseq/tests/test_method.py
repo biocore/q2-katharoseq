@@ -57,7 +57,6 @@ class KatharoSeqTestCase(TestCase):
 
         self.fp = join(dirname(abspath(getfile(currentframe()))), 'example')
 
-
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
