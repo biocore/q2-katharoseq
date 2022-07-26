@@ -55,7 +55,8 @@ class KatharoSeqTestCase(TestCase):
         self.control = 'classic'
         self.threshold = 50
 
-        self.fp = join(dirname(abspath(getfile(currentframe()))), '../../example')
+        folder = '../../example'
+        self.fp = join(dirname(abspath(getfile(currentframe()))), folder)
 
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
