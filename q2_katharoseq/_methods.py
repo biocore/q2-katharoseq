@@ -85,7 +85,7 @@ def read_count_threshold(
 
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in ' +
-                       'positive control column.')
+                         'positive control column.')
     positive_controls = pd.Series(positive_controls)
 
     cell_counts = cell_count_column.loc[positive_controls.index]
