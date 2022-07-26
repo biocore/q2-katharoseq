@@ -9,7 +9,6 @@ import pkg_resources
 import math
 from sklearn.linear_model import LinearRegression
 
-
 control_type = {
     'atcc': [
         'd__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;'
@@ -80,20 +79,23 @@ def read_count_threshold(
     positive_control_column = positive_control_column.to_series()
     cell_count_column = cell_count_column.to_series()
 
-    # FILTER COLUMNS
+    # # FILTER COLUMNS
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
 
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in ' +
                          'positive control column.')
+    positive_controls = pd.Series(positive_controls)
+
     cell_counts = cell_count_column.loc[positive_controls.index]
 
-    # CHECK SHAPES
-    try:
-        table_positive = table.loc[set(positive_controls.index)]
-    except KeyError:
+    # # CHECK SHAPES
+    inds = positive_controls.index.intersection(table.index)
+    print(inds)
+    if len(inds) == 0:
         raise KeyError('No positive controls found in table.')
+    table_positive = table.loc[inds]
 
     if threshold > 100 or threshold < 0:
         raise ValueError('Threshold must be between 0 and 100.')
@@ -102,6 +104,10 @@ def read_count_threshold(
     # VISUAL CHECK: TOP 7 TAXA MAKE UP MOST OF THE
     # READS IN HIGHEST INPUT SAMPLE
     max_cell_counts = cell_counts.idxmax()
+
+    if max_cell_counts not in df.index.values:
+        raise KeyError('No positive controls found in table.')
+
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
     max_inputT = max_inputT.sort_values(ascending=False).head(10)
@@ -154,7 +160,7 @@ def read_count_threshold(
 
 
 def estimating_biomass(
-        total_reads: qiime2.NumericMetadataColumn,
+        table: pd.DataFrame,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
@@ -163,8 +169,9 @@ def estimating_biomass(
         dna_extract_vol: int,
         extraction_mass_g: qiime2.NumericMetadataColumn) -> pd.DataFrame:
 
-    total_reads = total_reads.to_series()
+    total_reads = table.sum(axis=1)
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
 
     positive_control_column = positive_control_column.to_series().loc[
@@ -196,19 +203,22 @@ def estimating_biomass(
     filtered['log_estimated_cells_per_g'] = \
         filtered.estimated_cells_per_g.apply(math.log10)
 
+    filtered.index.rename('sample_name', inplace=True)
+
     return filtered
 
 
 def biomass_plot(
         output_dir: str,
-        total_reads: qiime2.NumericMetadataColumn,
+        table: pd.DataFrame,
         control_cell_extraction: qiime2.NumericMetadataColumn,
         min_total_reads: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
 
-    total_reads = total_reads.to_series()
+    total_reads = table.sum(axis=1)
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered = filtered.rename(columns={0: 'total_reads'})
     filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
 
     positive_control_column = positive_control_column.to_series().loc[

@@ -55,6 +55,9 @@ class KatharoSeqTestCase(TestCase):
         self.control = 'classic'
         self.threshold = 50
 
+        folder = '../../example'
+        self.fp = join(dirname(abspath(getfile(currentframe()))), folder)
+
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
@@ -126,6 +129,7 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_table(self):
+
         ind = pd.Index(
                 ['s5', 's6', 's7', 's8'],
                 name='sampleid')
@@ -167,38 +171,42 @@ class KatharoSeqTestCase(TestCase):
         self.assertTrue(min_freq == 1)
 
     def test_estimating_biomass(self):
-        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+        data = qiime2.Metadata.load(f'{self.fp}/fmp_metadata.tsv')
+
+        table = f'{self.fp}/fmp_collapsed_table.qza'
+        table = qiime2.Artifact.load(table).view(pd.DataFrame)
 
         obs = estimating_biomass(
-            total_reads=data.get_column('total_reads'),
+            # total_reads=data.get_column('total_reads'),
+            table=table,
             control_cell_extraction=data.get_column('control_cell_into_extraction'),  # noqa
             min_total_reads=1150,
-            positive_control_value='True',
-            positive_control_column=data.get_column('positive_control'),
+            positive_control_value='control',
+            positive_control_column=data.get_column('control_rct'),
             pcr_template_vol=5,
             dna_extract_vol=60,
             extraction_mass_g=data.get_column('extraction_mass_g')
         )
-        exp = pd.read_csv(
-            f'{fp}/output_estimating_biomass.tsv', sep='\t', index_col=0)
+
+        exp = pd.read_csv(f'{self.fp}/est_biomass_output.csv', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
 
     def test_biomass_plot(self):
-        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/input_estimating_biomass.tsv')
+        data = qiime2.Metadata.load(f'{self.fp}/fmp_metadata.tsv')
+        table = qiime2.Artifact.load(f'{self.fp}/fmp_collapsed_table.qza')
+        table = table.view(pd.DataFrame)
 
         with tempfile.TemporaryDirectory() as output_dir:
             biomass_plot(
                 output_dir,
-                total_reads=data.get_column('total_reads'),
+                table=table,
                 control_cell_extraction=data.get_column(
                     'control_cell_into_extraction'),  # noqa
                 min_total_reads=1150,
-                positive_control_value='True',
-                positive_control_column=data.get_column('positive_control')
+                positive_control_value='control',
+                positive_control_column=data.get_column('control_rct')
             )
 
             index_fp = os.path.join(output_dir, 'index.html')

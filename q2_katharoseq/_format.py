@@ -17,6 +17,9 @@ class EstimatedBiomassFmt(model.TextFileFormat):
 
         return hdr == STATS_HEADER
 
+    def validate(self, *args):
+        pass
+
 
 EstimatedBiomassDirFmt = model.SingleFileDirectoryFormat(
     'EstimatedBiomassDirFmt', 'est_biomass.csv', EstimatedBiomassFmt)

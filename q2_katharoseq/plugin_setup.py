@@ -32,14 +32,14 @@ plugin.register_semantic_type_to_format(EstimatedBiomass,
 plugin.visualizers.register_function(
     function=read_count_threshold,
     inputs={
-        'table': FeatureTable[Frequency]
+        'table': FeatureTable[Frequency],
     },
     parameters={
         'control': Str % Choices(control_type.keys()),
         'threshold': Int,
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],
-        'cell_count_column': MetadataColumn[Numeric]
+        'cell_count_column': MetadataColumn[Numeric],
     },
     input_descriptions={
         'table': (
@@ -73,9 +73,10 @@ plugin.visualizers.register_function(
 
 plugin.methods.register_function(
     function=estimating_biomass,
-    inputs={},
-    parameters={'total_reads': MetadataColumn[Numeric],
-                'control_cell_extraction': MetadataColumn[Numeric],
+    inputs={
+        'table': FeatureTable[Frequency],
+    },
+    parameters={'control_cell_extraction': MetadataColumn[Numeric],
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
                 'extraction_mass_g': MetadataColumn[Numeric],
@@ -83,9 +84,13 @@ plugin.methods.register_function(
                 'pcr_template_vol': Int,
                 'dna_extract_vol': Int},
     outputs=[('estimated_biomass', EstimatedBiomass)],
-    input_descriptions={},
+    input_descriptions={
+        'table': (
+            'A FeatureTable collapsed to the genus level (level 6) that '
+            'contains the control samples.'
+        ),
+    },
     parameter_descriptions={
-        'total_reads': 'The total sum of the reads or ASVs for each sample.',
         'control_cell_extraction': (
             'The estimated number of cells or genomes used as input to your '
             'library prep. One may typically estimate this by determining the '
@@ -121,16 +126,21 @@ plugin.methods.register_function(
 
 plugin.visualizers.register_function(
     function=biomass_plot,
-    inputs={},
-    parameters={'total_reads': MetadataColumn[Numeric],
-                'control_cell_extraction': MetadataColumn[Numeric],
+    inputs={
+        'table': FeatureTable[Frequency],
+    },
+    parameters={'control_cell_extraction': MetadataColumn[Numeric],
                 'positive_control_column': MetadataColumn[Categorical],
                 'positive_control_value': Str,
                 'min_total_reads': Int
                 },
-    input_descriptions={},
+    input_descriptions={
+        'table': (
+            'A FeatureTable collapsed to the genus level (level 6) that '
+            'contains the control samples.'
+        ),
+    },
     parameter_descriptions={
-        'total_reads': 'The total sum of the reads or ASVs for each sample.',
         'control_cell_extraction': (
             'The estimated number of cells or genomes used as input to your '
             'library prep. One may typically estimate this by determining the '
