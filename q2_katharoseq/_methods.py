@@ -84,7 +84,7 @@ def read_count_threshold(
         positive_control_column == positive_control_value]
 
     if not positive_controls.shape[0]:
-        raise KeyError('No positive controls found in ' +
+        raise ValueError('No positive controls found in ' +
                        'positive control column.')
     positive_controls = pd.Series(positive_controls)
 
