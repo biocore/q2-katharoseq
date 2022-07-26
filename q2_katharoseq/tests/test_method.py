@@ -55,6 +55,9 @@ class KatharoSeqTestCase(TestCase):
         self.control = 'classic'
         self.threshold = 50
 
+        self.fp = join(dirname(abspath(getfile(currentframe()))), 'example')
+
+
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
@@ -169,9 +172,9 @@ class KatharoSeqTestCase(TestCase):
 
     def test_estimating_biomass(self):
 
-        data = qiime2.Metadata.load('../../example/fmp_metadata.tsv')
+        data = qiime2.Metadata.load(f'{self.fp}/fmp_metadata.tsv')
 
-        table = '../../example/fmp_collapsed_table.qza'
+        table = f'{self.fp}/fmp_collapsed_table.qza'
         table = qiime2.Artifact.load(table).view(pd.DataFrame)
 
         obs = estimating_biomass(
@@ -186,14 +189,13 @@ class KatharoSeqTestCase(TestCase):
             extraction_mass_g=data.get_column('extraction_mass_g')
         )
 
-        exp = pd.read_csv('../../example/est_biomass_output.csv', index_col=0)
+        exp = pd.read_csv(f'{self.fp}/est_biomass_output.csv', index_col=0)
         pd.testing.assert_frame_equal(obs, exp)
 
     def test_biomass_plot(self):
-        fp = join(dirname(abspath(getfile(currentframe()))), 'support_files')
 
-        data = qiime2.Metadata.load(f'{fp}/fmp_metadata.tsv')
-        table = qiime2.Artifact.load(f'{fp}/fmp_collapsed_table.qza')
+        data = qiime2.Metadata.load(f'{self.fp}/fmp_metadata.tsv')
+        table = qiime2.Artifact.load(f'{self.fp}/fmp_collapsed_table.qza')
         table = table.view(pd.DataFrame)
 
         with tempfile.TemporaryDirectory() as output_dir:
