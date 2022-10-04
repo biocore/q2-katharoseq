@@ -14,7 +14,7 @@ control_type = {
         'd__Bacteria;p__Firmicutes;c__Clostridia;o__Clostridiales;'
         'f__Clostridiaceae;g__Clostridium',
         'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-        'o__Enterobacterales;f__Enterobacteriaceae;__',
+        'o__Enterobacterales;f__Enterobacteriaceae;g__',
         'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
         'o__Enterobacterales;f__Enterobacteriaceae;'
         'g__Escherichia-Shigella',
@@ -64,6 +64,35 @@ def get_threshold(r1, r2, thresh):
     min_log_reads = np.power((k/(1/y-1)), (1/h))
     min_freq = np.power(10, min_log_reads).astype(int)
     return min_freq
+
+def fit_lm(table,
+           min_total_reads,
+           positive_control_column,
+           positive_control_value,
+           control_cell_extraction):
+                
+    total_reads = table.sum(axis=1)
+    filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
+    filtered = filtered.rename(columns={0: 'total_reads'})
+    filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
+
+    positive_control_column = positive_control_column.to_series().loc[
+        filtered.index]
+    positive_controls = positive_control_column[
+        positive_control_column == positive_control_value]
+    positive_controls = filtered.loc[positive_controls.index]
+
+    positive_controls['control_cell_extraction'] = \
+        control_cell_extraction.to_series().loc[positive_controls.index]
+    positive_controls['log_control_cell_extraction'] = \
+        positive_controls.control_cell_extraction.apply(math.log10)
+
+    lm = LinearRegression()
+    lm.fit(
+        positive_controls.log_total_reads.values.reshape(-1, 1),
+        positive_controls.log_control_cell_extraction)
+
+    return lm, filtered, positive_controls
 
 
 def read_count_threshold(
@@ -169,26 +198,11 @@ def estimating_biomass(
         dna_extract_vol: int,
         extraction_mass_g: qiime2.NumericMetadataColumn) -> pd.DataFrame:
 
-    total_reads = table.sum(axis=1)
-    filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
-    filtered = filtered.rename(columns={0: 'total_reads'})
-    filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
-
-    positive_control_column = positive_control_column.to_series().loc[
-        filtered.index]
-    positive_controls = positive_control_column[
-        positive_control_column == positive_control_value]
-    positive_controls = filtered.loc[positive_controls.index]
-
-    positive_controls['control_cell_extraction'] = \
-        control_cell_extraction.to_series().loc[positive_controls.index]
-    positive_controls['log_control_cell_extraction'] = \
-        positive_controls.control_cell_extraction.apply(math.log10)
-
-    lm = LinearRegression()
-    lm.fit(
-        positive_controls.log_total_reads.values.reshape(-1, 1),
-        positive_controls.log_control_cell_extraction)
+    lm, filtered, positive_controls = fit_lm(table,
+                                             min_total_reads,
+                                             positive_control_column,
+                                             positive_control_value,
+                                             control_cell_extraction)
 
     filtered['estimated_biomass_per_pcrrxn'] = \
         10**((filtered.log_total_reads*lm.coef_[0])+lm.intercept_)
@@ -215,27 +229,12 @@ def biomass_plot(
         min_total_reads: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
-
-    total_reads = table.sum(axis=1)
-    filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
-    filtered = filtered.rename(columns={0: 'total_reads'})
-    filtered['log_total_reads'] = filtered.total_reads.apply(math.log10)
-
-    positive_control_column = positive_control_column.to_series().loc[
-        filtered.index]
-    positive_controls = positive_control_column[
-        positive_control_column == positive_control_value]
-    positive_controls = filtered.loc[positive_controls.index]
-
-    positive_controls['control_cell_extraction'] = \
-        control_cell_extraction.to_series().loc[positive_controls.index]
-    positive_controls['log_control_cell_extraction'] = \
-        positive_controls.control_cell_extraction.apply(math.log10)
-
-    lm = LinearRegression()
-    lm.fit(
-        positive_controls.log_total_reads.values.reshape(-1, 1),
-        positive_controls.log_control_cell_extraction)
+    
+    lm, filtered, positive_controls = fit_lm(table,
+                                             min_total_reads,
+                                             positive_control_column,
+                                             positive_control_value,
+                                             control_cell_extraction)
 
     # MAKE PLOT
     y = positive_controls['log_control_cell_extraction']
