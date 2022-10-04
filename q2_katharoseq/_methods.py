@@ -65,12 +65,13 @@ def get_threshold(r1, r2, thresh):
     min_freq = np.power(10, min_log_reads).astype(int)
     return min_freq
 
+
 def fit_lm(table,
            min_total_reads,
            positive_control_column,
            positive_control_value,
            control_cell_extraction):
-                
+
     total_reads = table.sum(axis=1)
     filtered = pd.DataFrame(total_reads[total_reads > min_total_reads])
     filtered = filtered.rename(columns={0: 'total_reads'})
@@ -229,7 +230,7 @@ def biomass_plot(
         min_total_reads: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn) -> None:
-    
+
     lm, filtered, positive_controls = fit_lm(table,
                                              min_total_reads,
                                              positive_control_column,
