@@ -1,5 +1,8 @@
 # KatharoSeq
 
+![](https://github.com/qiime2/q2templates/workflows/ci/badge.svg) [![DOI](https://zenodo.org/badge/459343122.svg)](https://zenodo.org/badge/latestdoi/459343122)
+
+
 An implementation of the KatharoSeq protocol, originally defined in [Minich et al 2018 mSystems](https://journals.asm.org/doi/10.1128/mSystems.00218-17) and in [Minich et al 2022](https://www.biorxiv.org/content/10.1101/2022.03.07.483203v1)
 
 ## Installation
