@@ -1,6 +1,9 @@
 # KatharoSeq
 
-An implementation of the KatharoSeq protocol, originally defined in [Minich et al 2018 mSystems](https://journals.asm.org/doi/10.1128/mSystems.00218-17).
+![](https://github.com/qiime2/q2templates/workflows/ci/badge.svg) [![DOI](https://zenodo.org/badge/459343122.svg)](https://zenodo.org/badge/latestdoi/459343122)
+
+
+An implementation of the KatharoSeq protocol, originally defined in [Minich et al 2018 mSystems](https://journals.asm.org/doi/10.1128/mSystems.00218-17) and in [Minich et al 2022](https://www.biorxiv.org/content/10.1101/2022.03.07.483203v1)
 
 ## Installation
 
@@ -15,6 +18,8 @@ pip install -e .
 ## Use
 
 Computation assumes that the user has classified their 16S features against SILVA, and that the `FeatureTable[Frequency]` has been collapsed to the genus level. Please see the [`q2-feature-classifier`](https://docs.qiime2.org/2022.2/plugins/available/feature-classifier/classify-sklearn/) for detail on how to perform taxonomy classification, and the [`q2-taxa`](https://docs.qiime2.org/2022.2/plugins/available/taxa/collapse/) plugin for information on collapsing to a taxonomic level. If you need more information on how to process your data, please refer to one of the relevant tutorials that can be found [here](https://docs.qiime2.org/2022.2/tutorials/). For these examples, data from the Fish Microbiome Project (FMP): [Fish microbiomes 101: disentangling the rules governing marine fish mucosal microbiomes across 101 species](https://www.biorxiv.org/content/10.1101/2022.03.07.483203v1) paper will be used, and can be found in the `example` folder.
+
+For a less stringent filter, an appropriate value for `--p-threshold` would be around 50. For a more strict filter, use a value like 90, as shown below in the example.
 
 
 ## Read Count Threshold
@@ -62,11 +67,11 @@ Finally in order to visualize the results from `estimating-biomass`, run `biomas
 ```
 qiime katharoseq biomass-plot \
     --i-table example/fmp_collapsed_table.qza \
-    --m-control-cell-extraction-file example/fmp_metadata_mod.tsv \
+    --m-control-cell-extraction-file example/fmp_metadata.tsv \
     --m-control-cell-extraction-column control_cell_into_extraction \
     --p-min-total-reads 1315 \
     --p-positive-control-value control \
-    --m-positive-control-column-file example/fmp_metadata_mod.tsv \
+    --m-positive-control-column-file example/fmp_metadata.tsv \
     --m-positive-control-column-column control_rct \
     --o-visualization biomass_plot_fmp
 ```
