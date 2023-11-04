@@ -16,6 +16,7 @@ setup(
     name="q2-katharoseq",
     packages=find_packages(),
     version=versioneer.get_version(),
+    #version='1.0.0',
     cmdclass=versioneer.get_cmdclass(),
     author="Daniela Perry",
     author_email="dsperry@ucsd.edu",

@@ -1,3 +1,7 @@
 q2_katharoseq.egg-info/
 q2_katharoseq/__pycache__/
 __pycache__/
+
+# Pypi distribution related directories
+./build/*
+./dist/*
