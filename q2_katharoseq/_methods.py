@@ -43,6 +43,11 @@ control_type = {
         'f__Bacillaceae;g__Bacillus',
         'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;'
         'o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus'],
+    'gg2': [
+        'd__Bacteria;p__Firmicutes_D;c__Bacilli;o__Bacillales_B_306089;f__Bacillaceae_H_294103;g__Bacillus_P_294101',
+        'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Xanthomonadales_616009;f__Xanthomonadaceae_616009;g__Lysobacter_A_615995',
+        'd__Bacteria;p__Proteobacteria;c__Alphaproteobacteria;o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus'
+        ],
     'single': [
         'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
         'o__Burkholderiales;f__Comamonadaceae;g__Variovorax']
