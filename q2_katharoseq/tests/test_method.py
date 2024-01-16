@@ -163,23 +163,12 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_table(self):
-
-        ind = pd.Index(
-                ['s5', 's6', 's7', 's8'],
-                name='sampleid')
-        table = pd.DataFrame(
-            [[0, 1, 2, 3],
-             [0, 1, 2, 3],
-             [5, 4, 3, 2],
-             [7, 2, 3, 4]],
-            index=ind,  # change index
-            columns=['f1', 'f2', 'f3', 'f4'])
+        table = self.table.loc[['s2', 's4']]
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
-                KeyError,
-                'No positive controls found '
-                'in table.'):
+                ValueError,
+                'No positive controls found'):
 
             read_count_threshold(
                 output_dir,
