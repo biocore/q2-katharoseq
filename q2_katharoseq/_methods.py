@@ -105,7 +105,7 @@ def read_count_threshold(
         cell_count_column: qiime2.NumericMetadataColumn,
         table: pd.DataFrame,
         control: str,
-        asv: str=None) -> None:
+        asv: str = None) -> None:
     if control == 'asv':
         if asv is None:
             raise ValueError("Control type set to asv but no asv provided")
