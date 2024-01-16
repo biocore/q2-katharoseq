@@ -58,6 +58,40 @@ class KatharoSeqTestCase(TestCase):
         folder = '../../example'
         self.fp = join(dirname(abspath(getfile(currentframe()))), folder)
 
+    def test_read_count_threshold_works_with_metadata_superset(self):
+        # make sure we work when a katharoseq control isn't present in the
+        # table
+        pos_control_col = self.positive_control_column.to_series().copy()
+        pos_control_col_name = pos_control_col.name
+        pos_control_col_idxname = pos_control_col.index.name
+        pos_control_col = pd.concat([pos_control_col,
+                                    pd.Series(['a', ], index=['foo', ])])
+        pos_control_col.name = pos_control_col_name
+        pos_control_col.index.name = pos_control_col_idxname
+        pos_control_col = CategoricalMetadataColumn(pos_control_col)
+
+        cell_count_col = self.cell_count_column.to_series().copy()
+        cell_count_col_name = cell_count_col.name
+        cell_count_col_idxname = cell_count_col.index.name
+        cell_count_col = pd.concat([cell_count_col,
+                                    pd.Series([1000000, ], index=['foo', ])])
+        cell_count_col.name = cell_count_col_name
+        cell_count_col.index.name = cell_count_col_idxname
+        cell_count_col = NumericMetadataColumn(cell_count_col)
+
+        with tempfile.TemporaryDirectory() as output_dir:
+            read_count_threshold(
+                output_dir,
+                self.threshold,
+                self.positive_control_value,
+                pos_control_col,
+                cell_count_col,
+                self.table,
+                self.control)
+
+            index_fp = os.path.join(output_dir, 'index.html')
+            self.assertTrue(os.path.exists(index_fp))
+
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
