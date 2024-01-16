@@ -58,6 +58,21 @@ class KatharoSeqTestCase(TestCase):
         folder = '../../example'
         self.fp = join(dirname(abspath(getfile(currentframe()))), folder)
 
+    def test_specify_asv_as_control(self):
+        with tempfile.TemporaryDirectory() as output_dir:
+            read_count_threshold(
+                output_dir,
+                self.threshold,
+                self.positive_control_value,
+                self.positive_control_column,
+                self.cell_count_column,
+                self.table,
+                'asv',
+                'f4')
+
+            index_fp = os.path.join(output_dir, 'index.html')
+            self.assertTrue(os.path.exists(index_fp))
+
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(

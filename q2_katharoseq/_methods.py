@@ -45,7 +45,8 @@ control_type = {
         'o__Rhodobacterales;f__Rhodobacteraceae;g__Paracoccus'],
     'single': [
         'd__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;'
-        'o__Burkholderiales;f__Comamonadaceae;g__Variovorax']
+        'o__Burkholderiales;f__Comamonadaceae;g__Variovorax'],
+    'asv': ''
 }
 
 
@@ -103,7 +104,13 @@ def read_count_threshold(
         positive_control_column: qiime2.CategoricalMetadataColumn,
         cell_count_column: qiime2.NumericMetadataColumn,
         table: pd.DataFrame,
-        control: str) -> None:
+        control: str,
+        asv: str=None) -> None:
+    if control == 'asv':
+        if asv is None:
+            raise ValueError("Control type set to asv but no asv provided")
+        if asv not in table.columns:
+            raise ValueError("asv not found in the feature table")
 
     # CONVERSIONS
     positive_control_column = positive_control_column.to_series()
@@ -146,7 +153,10 @@ def read_count_threshold(
     df['asv_reads'] = df.sum(axis=1)
 
     # NUMBER READS ALIGNING TO MOCK COMMUNITY INPUT
-    df['control_reads'] = df[control_type[control]].sum(axis=1)
+    if control == 'asv':
+        df['control_reads'] = df[asv]
+    else:
+        df['control_reads'] = df[control_type[control]].sum(axis=1)
 
     # PERCENT CORRECTLY ASSIGNED
     df['correct_assign'] = df['control_reads'] / df['asv_reads']
