@@ -58,6 +58,40 @@ class KatharoSeqTestCase(TestCase):
         folder = '../../example'
         self.fp = join(dirname(abspath(getfile(currentframe()))), folder)
 
+    def test_read_count_threshold_works_with_metadata_superset(self):
+        # make sure we work when a katharoseq control isn't present in the
+        # table
+        pos_control_col = self.positive_control_column.to_series().copy()
+        pos_control_col_name = pos_control_col.name
+        pos_control_col_idxname = pos_control_col.index.name
+        pos_control_col = pd.concat([pos_control_col,
+                                    pd.Series(['a', ], index=['foo', ])])
+        pos_control_col.name = pos_control_col_name
+        pos_control_col.index.name = pos_control_col_idxname
+        pos_control_col = CategoricalMetadataColumn(pos_control_col)
+
+        cell_count_col = self.cell_count_column.to_series().copy()
+        cell_count_col_name = cell_count_col.name
+        cell_count_col_idxname = cell_count_col.index.name
+        cell_count_col = pd.concat([cell_count_col,
+                                    pd.Series([1000000, ], index=['foo', ])])
+        cell_count_col.name = cell_count_col_name
+        cell_count_col.index.name = cell_count_col_idxname
+        cell_count_col = NumericMetadataColumn(cell_count_col)
+
+        with tempfile.TemporaryDirectory() as output_dir:
+            read_count_threshold(
+                output_dir,
+                self.threshold,
+                self.positive_control_value,
+                pos_control_col,
+                cell_count_col,
+                self.table,
+                self.control)
+
+            index_fp = os.path.join(output_dir, 'index.html')
+            self.assertTrue(os.path.exists(index_fp))
+
     def test_outputs_index(self):
         with tempfile.TemporaryDirectory() as output_dir:
             read_count_threshold(
@@ -129,23 +163,12 @@ class KatharoSeqTestCase(TestCase):
                 self.control)
 
     def test_no_positive_controls_in_table(self):
-
-        ind = pd.Index(
-                ['s5', 's6', 's7', 's8'],
-                name='sampleid')
-        table = pd.DataFrame(
-            [[0, 1, 2, 3],
-             [0, 1, 2, 3],
-             [5, 4, 3, 2],
-             [7, 2, 3, 4]],
-            index=ind,  # change index
-            columns=['f1', 'f2', 'f3', 'f4'])
+        table = self.table.loc[['s2', 's4']]
 
         with tempfile.TemporaryDirectory() as output_dir, \
             self.assertRaisesRegex(
-                KeyError,
-                'No positive controls found '
-                'in table.'):
+                ValueError,
+                'No positive controls found'):
 
             read_count_threshold(
                 output_dir,

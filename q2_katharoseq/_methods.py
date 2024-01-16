@@ -109,22 +109,30 @@ def read_count_threshold(
     positive_control_column = positive_control_column.to_series()
     cell_count_column = cell_count_column.to_series()
 
-    # # FILTER COLUMNS
+    if set(positive_control_column.index) != set(cell_count_column.index):
+        raise ValueError("Columns have different samples")
+
+    md_samples = set(positive_control_column.index)
+    tab_samples = set(table.index)
+    if not md_samples.issuperset(tab_samples):
+        raise ValueError("Table contains samples not in metadata")
+
+    # overlap to what's present in the feature table
+    positive_control_column = positive_control_column.loc[list(tab_samples)]
+    cell_count_column = cell_count_column.loc[list(tab_samples)]
+
+    # FILTER COLUMNS
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
 
     if not positive_controls.shape[0]:
         raise ValueError('No positive controls found in ' +
-                         'positive control column.')
+                         'positive control column which are in the table.')
     positive_controls = pd.Series(positive_controls)
 
     cell_counts = cell_count_column.loc[positive_controls.index]
 
-    # # CHECK SHAPES
     inds = positive_controls.index.intersection(table.index)
-    print(inds)
-    if len(inds) == 0:
-        raise KeyError('No positive controls found in table.')
     table_positive = table.loc[inds]
 
     if threshold > 100 or threshold < 0:
@@ -134,9 +142,6 @@ def read_count_threshold(
     # VISUAL CHECK: TOP 7 TAXA MAKE UP MOST OF THE
     # READS IN HIGHEST INPUT SAMPLE
     max_cell_counts = cell_counts.idxmax()
-
-    if max_cell_counts not in df.index.values:
-        raise KeyError('No positive controls found in table.')
 
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
