@@ -40,6 +40,7 @@ plugin.visualizers.register_function(
         'positive_control_value': Str,
         'positive_control_column': MetadataColumn[Categorical],
         'cell_count_column': MetadataColumn[Numeric],
+        'asv': Str,
     },
     input_descriptions={
         'table': (
@@ -62,6 +63,10 @@ plugin.visualizers.register_function(
         'positive_control_column': (
             'The column in the sample metadata that describes which samples '
             'are and are not controls.'
+        ),
+        'asv': (
+            'Specify an exact ASV to use for a control. If the features are '
+            'hashed, please use the feature hash'
         ),
     },
     name='Methods for the application of the KatharoSeq protocol',
