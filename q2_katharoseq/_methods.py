@@ -97,15 +97,15 @@ def fit_lm(table,
     return lm, filtered, positive_controls
 
 
-def read_count_threshold(
-        output_dir: str,
+def calculate_threshold(
         threshold: int,
         positive_control_value: str,
         positive_control_column: qiime2.CategoricalMetadataColumn,
         cell_count_column: qiime2.NumericMetadataColumn,
         table: pd.DataFrame,
         control: str,
-        asv: str = None) -> None:
+        asv: str = None):
+
     if control == 'asv':
         if asv is None:
             raise ValueError("Control type set to asv but no asv provided")
@@ -187,6 +187,41 @@ def read_count_threshold(
     min_freq = get_threshold(katharo['log_asv_reads'],
                              katharo['correct_assign'],
                              threshold/100)
+    return min_freq, popt, pcov, katharo, max_inputT
+
+
+def read_count_threshold(
+        output_dir: str,
+        threshold: int,
+        positive_control_value: str,
+        positive_control_column: qiime2.CategoricalMetadataColumn,
+        cell_count_column: qiime2.NumericMetadataColumn,
+        table: pd.DataFrame,
+        control: str,
+        asv: str = None) -> None:
+
+    min_freq, popt, pcov, katharo, max_inputT = \
+        calculate_threshold(threshold,
+                            positive_control_value,
+                            positive_control_column,
+                            cell_count_column,
+                            table,
+                            control,
+                            asv)
+
+
+    # PLOT
+    x = np.linspace(0, 5, 50)
+    y = allosteric_sigmoid(x, *popt)
+    plt.plot(katharo['log_asv_reads'],
+             katharo['correct_assign'],
+             'o', label='data')
+    plt.plot(x, y, label='fit')
+    plt.ylim(0, 1.05)
+    plt.legend(loc='best')
+    plt.savefig(os.path.join(output_dir, 'fit.svg'))
+    plt.close()
+
 
     # VISUALIZER
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
