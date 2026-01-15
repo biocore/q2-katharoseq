@@ -144,16 +144,18 @@ def read_count_threshold(
             f"the feature table sample IDs.\n"
             f"Example control IDs from metadata: {missing_samples}\n"
             f"Example sample IDs from table: {table_samples}\n"
-            f"Check that sample IDs match between your metadata and feature table."
+            f"Check that sample IDs match between your metadata and "
+            f"feature table."
         )
 
     if n_controls_in_table < n_controls_metadata:
         missing = positive_controls.index.difference(table.index)
         missing_cell_counts = cell_count_column.loc[missing]
         print(
-            f"Warning: Only {n_controls_in_table} of {n_controls_metadata} positive "
-            f"controls found in feature table. Missing {len(missing)} samples "
-            f"with cell counts: {sorted(missing_cell_counts.unique().tolist())}. "
+            f"Warning: Only {n_controls_in_table} of {n_controls_metadata} "
+            f"positive controls found in feature table. Missing "
+            f"{len(missing)} samples with cell counts: "
+            f"{sorted(missing_cell_counts.unique().tolist())}. "
             f"Proceeding with available controls.",
             file=sys.stderr
         )
@@ -169,7 +171,8 @@ def read_count_threshold(
         raise ValueError(
             f"Insufficient dilution series: only {len(unique_cell_counts)} "
             f"unique cell count values found ({sorted(unique_cell_counts)}). "
-            f"At least 3 different concentrations are required for curve fitting."
+            f"At least 3 different concentrations are required for "
+            f"curve fitting."
         )
 
     if threshold > 100 or threshold < 0:
@@ -190,9 +193,10 @@ def read_count_threshold(
     zero_read_samples = df[df['asv_reads'] == 0].index.tolist()
     if zero_read_samples:
         raise ValueError(
-            f"Found {len(zero_read_samples)} positive control sample(s) with zero "
-            f"total reads: {zero_read_samples[:5]}. Cannot compute correct assignment "
-            f"ratio. These samples may have been filtered out upstream."
+            f"Found {len(zero_read_samples)} positive control sample(s) "
+            f"with zero total reads: {zero_read_samples[:5]}. Cannot "
+            f"compute correct assignment ratio. These samples may have "
+            f"been filtered out upstream."
         )
 
     # number reads aligning to mock community input
@@ -204,8 +208,9 @@ def read_count_threshold(
         missing_taxa = [t for t in control_taxa if t not in df.columns]
         if len(missing_taxa) == len(control_taxa):
             raise ValueError(
-                f"None of the {control} control taxa were found in the feature table. "
-                f"Expected taxa like: {control_taxa[0][:50]}..."
+                f"None of the {control} control taxa were found in the "
+                f"feature table. Expected taxa like: "
+                f"{control_taxa[0][:50]}..."
             )
         # use only taxa that exist
         present_taxa = [t for t in control_taxa if t in df.columns]
@@ -216,15 +221,17 @@ def read_count_threshold(
     if total_control_reads == 0:
         if control == 'asv':
             raise ValueError(
-                f"The specified ASV has zero reads in all {len(df)} positive control "
-                f"samples. Cannot build KatharoSeq curve. Verify the ASV sequence is "
-                f"correct and present in your positive control dilution series."
+                f"The specified ASV has zero reads in all {len(df)} "
+                f"positive control samples. Cannot build KatharoSeq "
+                f"curve. Verify the ASV sequence is correct and present "
+                f"in your positive control dilution series."
             )
         else:
             raise ValueError(
-                f"The {control} control taxa have zero total reads across all "
-                f"{len(df)} positive control samples. Cannot build KatharoSeq curve. "
-                f"Verify the control type matches your experimental setup."
+                f"The {control} control taxa have zero total reads across "
+                f"all {len(df)} positive control samples. Cannot build "
+                f"KatharoSeq curve. Verify the control type matches your "
+                f"experimental setup."
             )
 
     # percent correctly assigned
@@ -234,9 +241,10 @@ def read_count_threshold(
     unique_correct_assign = df['correct_assign'].nunique()
     if unique_correct_assign < 2:
         raise ValueError(
-            f"All positive control samples have identical correct assignment ratio "
-            f"({df['correct_assign'].iloc[0]:.4f}). Cannot fit curve without variation "
-            f"in the data. Check that your dilution series spans a range of concentrations."
+            f"All positive control samples have identical correct "
+            f"assignment ratio ({df['correct_assign'].iloc[0]:.4f}). "
+            f"Cannot fit curve without variation in the data. Check "
+            f"that your dilution series spans a range of concentrations."
         )
 
     # define katharo
@@ -251,11 +259,14 @@ def read_count_threshold(
                                method='dogbox')
     except RuntimeError as e:
         raise RuntimeError(
-            f"Curve fitting failed to converge. This typically indicates the data "
-            f"does not follow the expected sigmoid pattern. Details: {e}\n"
-            f"Data summary - log_asv_reads range: [{katharo['log_asv_reads'].min():.2f}, "
+            f"Curve fitting failed to converge. This typically indicates "
+            f"the data does not follow the expected sigmoid pattern. "
+            f"Details: {e}\n"
+            f"Data summary - log_asv_reads range: "
+            f"[{katharo['log_asv_reads'].min():.2f}, "
             f"{katharo['log_asv_reads'].max():.2f}], correct_assign range: "
-            f"[{katharo['correct_assign'].min():.4f}, {katharo['correct_assign'].max():.4f}]"
+            f"[{katharo['correct_assign'].min():.4f}, "
+            f"{katharo['correct_assign'].max():.4f}]"
         ) from e
 
     # plot

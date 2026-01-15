@@ -391,8 +391,8 @@ class KatharoSeqTestCase(TestCase):
             [[1, 1, 2, 0],   # s1: a (control) - asv=0
              [2, 1, 2, 10],  # s2: b - asv=10
              [10, 4, 3, 0],  # s3: a (control) - asv=0
-             [20, 2, 3, 15], # s4: b - asv=15
-             [100, 5, 6, 0], # s5: a (control) - asv=0
+             [20, 2, 3, 15],  # s4: b - asv=15
+             [100, 5, 6, 0],  # s5: a (control) - asv=0
              [200, 8, 9, 20]],  # s6: b - asv=20
             index=ind,
             columns=['f1', 'f2', 'f3', 'target_asv'])
@@ -413,7 +413,7 @@ class KatharoSeqTestCase(TestCase):
                 'target_asv')
 
     def test_no_variation_in_correct_assign(self):
-        """Test error when all positive controls have identical correct_assign."""
+        """Test error when all controls have identical correct_assign."""
         ind = pd.Index(['s1', 's2', 's3', 's4', 's5', 's6'],
                        name='sampleid')
         positive_control_column = pd.Series(
