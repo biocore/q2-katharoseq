@@ -22,7 +22,7 @@ jobs:
         wget -q https://raw.githubusercontent.com/qiime2/distributions/dev/2025.7/tiny/released/qiime2-tiny-ubuntu-latest-conda.yml
         conda env create -q -n test-env --file qiime2-tiny-ubuntu-latest-conda.yml
         conda run -n test-env conda install -y pytest
-        conda run -n test-env pip install -e . --no-deps
+        conda run -n test-env pip install -e .
     - name: Test with pytest
       run: conda run -n test-env pytest
 
