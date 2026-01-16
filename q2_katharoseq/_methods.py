@@ -5,8 +5,9 @@ from scipy.optimize import curve_fit
 import matplotlib.pyplot as plt
 import os
 import q2templates
-import pkg_resources
+from importlib.resources import files
 import math
+import sys
 from sklearn.linear_model import LinearRegression
 
 control_type = {
@@ -112,66 +113,163 @@ def read_count_threshold(
         if asv not in table.columns:
             raise ValueError("asv not found in the feature table")
 
-    # CONVERSIONS
+    # conversions
     positive_control_column = positive_control_column.to_series()
     cell_count_column = cell_count_column.to_series()
 
-    # # FILTER COLUMNS
+    # filter columns
     positive_controls = positive_control_column[
         positive_control_column == positive_control_value]
 
     if not positive_controls.shape[0]:
-        raise ValueError('No positive controls found in ' +
-                         'positive control column.')
+        unique_values = positive_control_column.unique()[:10]
+        raise ValueError(
+            f"No positive controls found in positive control column. "
+            f"Searched for '{positive_control_value}' but found these values: "
+            f"{list(unique_values)}"
+        )
     positive_controls = pd.Series(positive_controls)
 
-    cell_counts = cell_count_column.loc[positive_controls.index]
-
-    # # CHECK SHAPES
+    # check shapes - validate overlap between metadata and feature table
+    n_controls_metadata = len(positive_controls)
     inds = positive_controls.index.intersection(table.index)
-    print(inds)
-    if len(inds) == 0:
-        raise KeyError('No positive controls found in table.')
+    n_controls_in_table = len(inds)
+
+    if n_controls_in_table == 0:
+        missing_samples = list(positive_controls.index[:5])
+        table_samples = list(table.index[:5])
+        raise KeyError(
+            f"No positive controls found in feature table. "
+            f"Found {n_controls_metadata} controls in metadata but none match "
+            f"the feature table sample IDs.\n"
+            f"Example control IDs from metadata: {missing_samples}\n"
+            f"Example sample IDs from table: {table_samples}\n"
+            f"Check that sample IDs match between your metadata and "
+            f"feature table."
+        )
+
+    if n_controls_in_table < n_controls_metadata:
+        missing = positive_controls.index.difference(table.index)
+        missing_cell_counts = cell_count_column.loc[missing]
+        print(
+            f"Warning: Only {n_controls_in_table} of {n_controls_metadata} "
+            f"positive controls found in feature table. Missing "
+            f"{len(missing)} samples with cell counts: "
+            f"{sorted(missing_cell_counts.unique().tolist())}. "
+            f"Proceeding with available controls.",
+            file=sys.stderr
+        )
+
     table_positive = table.loc[inds]
+
+    # get cell counts only for samples that are in the table
+    cell_counts = cell_count_column.loc[inds]
+
+    # validate we have enough points for curve fitting
+    unique_cell_counts = cell_counts.unique()
+    if len(unique_cell_counts) < 3:
+        raise ValueError(
+            f"Insufficient dilution series: only {len(unique_cell_counts)} "
+            f"unique cell count values found ({sorted(unique_cell_counts)}). "
+            f"At least 3 different concentrations are required for "
+            f"curve fitting."
+        )
 
     if threshold > 100 or threshold < 0:
         raise ValueError('Threshold must be between 0 and 100.')
     df = table_positive
 
-    # VISUAL CHECK: TOP 7 TAXA MAKE UP MOST OF THE
-    # READS IN HIGHEST INPUT SAMPLE
+    # visual check
     max_cell_counts = cell_counts.idxmax()
-
-    if max_cell_counts not in df.index.values:
-        raise KeyError('No positive controls found in table.')
 
     max_input = df.loc[max_cell_counts]
     max_inputT = max_input.T
     max_inputT = max_inputT.sort_values(ascending=False).head(10)
 
-    # Calculate the total number of reads per sample
+    # calculate the total number of reads per sample
     df['asv_reads'] = df.sum(axis=1)
 
-    # NUMBER READS ALIGNING TO MOCK COMMUNITY INPUT
+    # validate no zero-read samples
+    zero_read_samples = df[df['asv_reads'] == 0].index.tolist()
+    if zero_read_samples:
+        raise ValueError(
+            f"Found {len(zero_read_samples)} positive control sample(s) "
+            f"with zero total reads: {zero_read_samples[:5]}. Cannot "
+            f"compute correct assignment ratio. These samples may have "
+            f"been filtered out upstream."
+        )
+
+    # number reads aligning to mock community input
     if control == 'asv':
         df['control_reads'] = df[asv]
     else:
-        df['control_reads'] = df[control_type[control]].sum(axis=1)
+        # validate control taxa exist in the table
+        control_taxa = control_type[control]
+        missing_taxa = [t for t in control_taxa if t not in df.columns]
+        if len(missing_taxa) == len(control_taxa):
+            raise ValueError(
+                f"None of the {control} control taxa were found in the "
+                f"feature table. Expected taxa like: "
+                f"{control_taxa[0][:50]}..."
+            )
+        # use only taxa that exist
+        present_taxa = [t for t in control_taxa if t in df.columns]
+        df['control_reads'] = df[present_taxa].sum(axis=1)
 
-    # PERCENT CORRECTLY ASSIGNED
+    # validate control has reads in at least some positive controls
+    total_control_reads = df['control_reads'].sum()
+    if total_control_reads == 0:
+        if control == 'asv':
+            raise ValueError(
+                f"The specified ASV has zero reads in all {len(df)} "
+                f"positive control samples. Cannot build KatharoSeq "
+                f"curve. Verify the ASV sequence is correct and present "
+                f"in your positive control dilution series."
+            )
+        else:
+            raise ValueError(
+                f"The {control} control taxa have zero total reads across "
+                f"all {len(df)} positive control samples. Cannot build "
+                f"KatharoSeq curve. Verify the control type matches your "
+                f"experimental setup."
+            )
+
+    # percent correctly assigned
     df['correct_assign'] = df['control_reads'] / df['asv_reads']
 
-    # DEFINE KATHARO
+    # validate there's variation in correct_assign for curve fitting
+    unique_correct_assign = df['correct_assign'].nunique()
+    if unique_correct_assign < 2:
+        raise ValueError(
+            f"All positive control samples have identical correct "
+            f"assignment ratio ({df['correct_assign'].iloc[0]:.4f}). "
+            f"Cannot fit curve without variation in the data. Check "
+            f"that your dilution series spans a range of concentrations."
+        )
+
+    # define katharo
     katharo = df[['correct_assign', 'control_reads', 'asv_reads']].copy()
     katharo['log_asv_reads'] = np.log10(katharo['asv_reads'].values)
 
-    # FIT CURVE TO DATA
-    popt, pcov = curve_fit(allosteric_sigmoid,
-                           katharo['log_asv_reads'],
-                           katharo['correct_assign'],
-                           method='dogbox')
+    # fit curve to data
+    try:
+        popt, pcov = curve_fit(allosteric_sigmoid,
+                               katharo['log_asv_reads'],
+                               katharo['correct_assign'],
+                               method='dogbox')
+    except RuntimeError as e:
+        raise RuntimeError(
+            f"Curve fitting failed to converge. This typically indicates "
+            f"the data does not follow the expected sigmoid pattern. "
+            f"Details: {e}\n"
+            f"Data summary - log_asv_reads range: "
+            f"[{katharo['log_asv_reads'].min():.2f}, "
+            f"{katharo['log_asv_reads'].max():.2f}], correct_assign range: "
+            f"[{katharo['correct_assign'].min():.4f}, "
+            f"{katharo['correct_assign'].max():.4f}]"
+        ) from e
 
-    # PLOT
+    # plot
     x = np.linspace(0, 5, 50)
     y = allosteric_sigmoid(x, *popt)
     plt.plot(katharo['log_asv_reads'],
@@ -183,20 +281,19 @@ def read_count_threshold(
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
-    # FIND THRESHOLD
+    # find threshold
     min_freq = get_threshold(katharo['log_asv_reads'],
                              katharo['correct_assign'],
                              threshold/100)
 
-    # VISUALIZER
+    # visualizer
     max_input_html = q2templates.df_to_html(max_inputT.to_frame())
     context = {'minimum_frequency': min_freq,
                'threshold': threshold,
                'table': max_input_html}
-    TEMPLATES = pkg_resources.resource_filename(
-        'q2_katharoseq', 'read_count_threshold_assets')
-    index = os.path.join(TEMPLATES, 'index.html')
-    q2templates.render(index, output_dir, context=context)
+    TEMPLATES = files('q2_katharoseq') / 'read_count_threshold_assets'
+    index = TEMPLATES / 'index.html'
+    q2templates.render(str(index), output_dir, context=context)
 
 
 def estimating_biomass(
@@ -247,7 +344,7 @@ def biomass_plot(
                                              positive_control_value,
                                              control_cell_extraction)
 
-    # MAKE PLOT
+    # make plot
     y = positive_controls['log_control_cell_extraction']
     x = positive_controls['log_total_reads']
     intercept = lm.intercept_
@@ -264,8 +361,7 @@ def biomass_plot(
     plt.savefig(os.path.join(output_dir, 'fit.svg'))
     plt.close()
 
-    # VISUALIZER: git push origin visualizer
-    TEMPLATES = pkg_resources.resource_filename(
-        'q2_katharoseq', 'estimating_biomass_assets')
-    index = os.path.join(TEMPLATES, 'index.html')
-    q2templates.render(index, output_dir)
+    # visualizer
+    TEMPLATES = files('q2_katharoseq') / 'estimating_biomass_assets'
+    index = TEMPLATES / 'index.html'
+    q2templates.render(str(index), output_dir)
